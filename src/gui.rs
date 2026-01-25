@@ -1,5 +1,7 @@
 use crate::input;
+use crate::keycode;
 
+use iced::wgpu::naga::back;
 use iced::{
     Element, Size, Task, Theme, alignment, widget::{
         button, column, container, row, scrollable, stack, text
@@ -47,7 +49,6 @@ fn update(counter: &mut Counter, message: Message) -> Task<Message> {
     Task::none()
 }
 
-static mut bloopy: usize = 0;
 fn view(counter: &Counter) -> Element<Message> {
     let display = text(counter.value.to_string())
         .size(42)
@@ -57,23 +58,31 @@ fn view(counter: &Counter) -> Element<Message> {
         }
     );
 
-    let control: &str;
-
-    unsafe {
-        control = input::ALL.get(bloopy)
-        .copied()
-        .unwrap_or("FUCK");
-        
-        bloopy += 1; bloopy %= input::ALL.len();
-    }
-
-    
-
     let background: Element<Message> = scrollable(
-        column![].extend(input::ALL.iter().map(|code| text(*code).into())),
+        column![]
+        .extend(keycode::keyboard::ALL.iter().map(|code| text((*code).1).into()))
+        ,
     )
-    .width(iced::Length::Fill)
-    .height(iced::Length::Fill)
+    .width(iced::Fill)
+    .height(iced::Fill)
+    .into();
+
+    let background2: Element<Message> = scrollable(
+        column![]
+        .extend(keycode::keyboard::ALL.iter().map(|code| text((*code).1).into()))
+        ,
+    )
+    .width(iced::Fill)
+    .height(iced::Fill)
+    .into();
+
+    let background3: Element<Message> = scrollable(
+        column![]
+        .extend(keycode::keyboard::ALL.iter().map(|code| text((*code).1).into()))
+        ,
+    )
+    .width(iced::Fill)
+    .height(iced::Fill)
     .into();
 
     let main_content =
@@ -93,7 +102,7 @@ fn view(counter: &Counter) -> Element<Message> {
             .spacing(12)
             .align_y(iced::Alignment::Center),
 
-            text(control),
+            text("lalala"),
             button("Reset")
                 .on_press(Message::Reset)
                 .padding([12, 32]),
@@ -102,5 +111,5 @@ fn view(counter: &Counter) -> Element<Message> {
         .spacing(32)
         .align_x(iced::Alignment::Center);
 
-    stack!(background, main_content).into()
+    stack!(row![background,background2,background3], main_content).into()
 }

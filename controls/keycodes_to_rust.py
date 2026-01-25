@@ -57,6 +57,8 @@ the_numbers = [
 def prefix_keycode(category, keycode):
     return keycode_prefixes[category] + keycode
 
+# not needed anymore
+"""
 def number_check(stripped_keycode):
     if not stripped_keycode.isnumeric():
         return stripped_keycode
@@ -66,6 +68,7 @@ def number_check(stripped_keycode):
         return "ERROR OR SOMETHING: " + stripped_keycode
 
     return the_numbers[num]
+""" 
 
 def santize_desc(desc):
     return desc.replace("\\","\\\\").replace("\"", "\\\"")
@@ -82,11 +85,11 @@ def main():
                 current_category = category
                 print(f"category: {current_category} - {desc}")
                 out[current_category] = []
-                out[current_category].append(["CATEGORY",f"IOMS_{current_category}", f"{santize_desc(desc)}"])
+                out[current_category].append([f"{current_category}",f"IOMS_{current_category}", f"{santize_desc(desc)}"])
 
             elif keycode:
                 keycode = prefix_keycode(current_category, keycode)
-                stripped = number_check(keycode.partition("_")[2] or keycode)
+                stripped = keycode.partition("_")[2] or keycode
                 print(f"keycode:  {stripped} - {keycode} - {desc}")
                 out[current_category].append([stripped, keycode, santize_desc(desc)])
 
@@ -103,15 +106,15 @@ def main():
                 stripped = data[0]
                 code = data[1]
                 desc = data[2]
-                file.write(f"pub const {stripped}: &'static(&'static str, &'static str) = &(\"{code}\", \"{desc}\");\n")
+                file.write(f"pub const {code}: &'static(&'static str, &'static str, &'static str) = &(\"{code}\", \"{stripped}\", \"{desc}\");\n")
             
             #"ALL" list
-            file.write("pub const ALL: &'static[&'static(&'static str,&'static str)] = &[\n")
+            file.write("pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[\n")
             for data in out[category]:
                 stripped = data[0]
                 code = data[1]
                 desc = data[2]
-                file.write(f"\t{stripped}, //{desc}\n")
+                file.write(f"\t{code}, //{desc}\n")
             
             file.write("];\n")
     print("Done.")

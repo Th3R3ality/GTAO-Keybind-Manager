@@ -1,3 +1,39 @@
+pub mod cellphone_camera;
+pub mod cellphone_misc;
+pub mod cellphone_move;
+pub mod cellphone_takeout;
+pub mod context;
+pub mod creator_on_foot;
+pub mod creator;
+pub mod endscreen;
+pub mod frontend;
+pub mod general;
+pub mod ignore;
+pub mod multiplayer_chat;
+pub mod multiplayer_misc;
+pub mod multiplayer_wheel_consumables;
+pub mod on_foot_combat;
+pub mod on_foot_melee;
+pub mod on_foot_move;
+pub mod on_foot_shooting;
+pub mod on_foot_sniper_zoom;
+pub mod on_foot_sprint;
+pub mod on_foot_weapon_select;
+pub mod open_weapon_wheel;
+pub mod parachute;
+pub mod pause;
+pub mod pm_pane_foot;
+pub mod reserved;
+pub mod switch_camera;
+pub mod vehicle_fly_online;
+pub mod vehicle_fly;
+pub mod vehicle_general;
+pub mod vehicle_ground_online;
+pub mod vehicle_ground;
+pub mod vehicle_sub;
+
+
+/*
 pub const NEXT_CAMERA: &str = &"INPUT_NEXT_CAMERA";
 pub const LOOK_LR: &str = &"INPUT_LOOK_LR";
 pub const LOOK_UD: &str = &"INPUT_LOOK_UD";
@@ -723,3 +759,4 @@ pub const ALL: &[&str] = &[
     RESPAWN_FASTER,
     HUDMARKER_SELECT,
 ];
+*/
