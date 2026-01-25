@@ -1,5 +1,3 @@
-#the code in this file is so disgusting i am sorry to anyone who reads it, this is a quick hack
-
 #check default.xml
 """
 category_prefixes = {
@@ -10,7 +8,7 @@ category_prefixes = {
 all of them needs to be prefixed with IOMS_
 """
 #prefix is based on category
-#only KEYBOARD keycodes had their prefix stripped from the fivem docs
+#only KEYBOARD keycodes had their prefix stripped from the fivem docs (this is aids)
 keycode_prefixes = {
     "KEYBOARD": "KEY_",
     "DIGITALBUTTON_AXIS": "", #UNKNOWN
@@ -108,7 +106,6 @@ def main():
                 file.write(f"pub const {stripped}: &'static(&'static str, &'static str) = &(\"{code}\", \"{desc}\");\n")
             
             #"ALL" list
-
             file.write("pub const ALL: &'static[&'static(&'static str,&'static str)] = &[\n")
             for data in out[category]:
                 stripped = data[0]
@@ -117,12 +114,6 @@ def main():
                 file.write(f"\t{stripped}, //{desc}\n")
             
             file.write("];\n")
-
-
-
-            
-            
-
     print("Done.")
 
 if __name__ == "__main__":
