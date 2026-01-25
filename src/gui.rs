@@ -1,4 +1,4 @@
-use crate::controls;
+use crate::input;
 
 use iced::{
     Element, Size, Task, Theme, alignment, widget::{
@@ -60,17 +60,17 @@ fn view(counter: &Counter) -> Element<Message> {
     let control: &str;
 
     unsafe {
-        control = controls::INPUT_CODES.get(bloopy)
+        control = input::ALL.get(bloopy)
         .copied()
         .unwrap_or("FUCK");
         
-        bloopy += 1; bloopy %= controls::INPUT_CODES.len();
+        bloopy += 1; bloopy %= input::ALL.len();
     }
 
     
 
     let background: Element<Message> = scrollable(
-        column![].extend(controls::INPUT_CODES.iter().map(|line| text(*line).into())),
+        column![].extend(input::ALL.iter().map(|code| text(*code).into())),
     )
     .width(iced::Length::Fill)
     .height(iced::Length::Fill)

@@ -1,30 +1,5 @@
-use crate::keycode;
-use crate::input;
-
-#[derive(Clone, Debug)]
-pub struct Keybind {
-    pub input_code: String,
-    pub source: String,
-    pub keycode: String,
-}
-
-
-
-
-
-
-
-fn get_default_for_input(input_code: &str) -> &str {
-    match input_code {
-        input::NEXT_CAMERA => keycode::keyboard::V.0,
-        "INPUT_NEXT_CAMERA" => keycode::keyboard::V.0,
-        _ => keycode::NONE.0,
-    }
-}
-
-/*
 {
-  "INPUT_NEXT_CAMERA": "IOMS_KEYBOARD::KEY_V",
+  "INPUT_NEXT_CAMERA": "IOMS_KEYBOARD:KEY_V",
   "INPUT_INTERACTION_MENU": "IOMS_KEYBOARD:KEY_M",
   "INPUT_WEAPON_WHEEL_NEXT": "IOMS_MOUSE_WHEEL:IOM_WHEEL_DOWN",
   "INPUT_WEAPON_WHEEL_PREV": "IOMS_MOUSE_WHEEL:IOM_WHEEL_UP",
@@ -186,4 +161,4 @@ fn get_default_for_input(input_code: &str) -> &str {
   "INPUT_USE_ARMOR": "IOMS_KEYBOARD:KEY_V",
   "INPUT_VEH_SHIFT_GEAR_UP": "IOMS_KEYBOARD:KEY_RSHIFT",
   "INPUT_VEH_SHIFT_GEAR_DOWN": "IOMS_KEYBOARD:KEY_RCONTROL"
-};*/
+}
