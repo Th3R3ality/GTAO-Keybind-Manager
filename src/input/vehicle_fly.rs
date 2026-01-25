@@ -1,0 +1,16 @@
+pub const CATEGORY: &'static str = &"VEHICLE_FLY";
+pub const VEH_FLY_THROTTLE_UP: &'static str = &"INPUT_VEH_FLY_THROTTLE_UP";
+pub const VEH_FLY_THROTTLE_DOWN: &'static str = &"INPUT_VEH_FLY_THROTTLE_DOWN";
+pub const VEH_FLY_YAW_LEFT: &'static str = &"INPUT_VEH_FLY_YAW_LEFT";
+pub const VEH_FLY_YAW_RIGHT: &'static str = &"INPUT_VEH_FLY_YAW_RIGHT";
+pub const VEH_FLY_ROLL_LEFT_ONLY: &'static str = &"INPUT_VEH_FLY_ROLL_LEFT_ONLY";
+pub const VEH_FLY_ROLL_RIGHT_ONLY: &'static str = &"INPUT_VEH_FLY_ROLL_RIGHT_ONLY";
+pub const VEH_FLY_PITCH_UP_ONLY: &'static str = &"INPUT_VEH_FLY_PITCH_UP_ONLY";
+pub const VEH_FLY_PITCH_DOWN_ONLY: &'static str = &"INPUT_VEH_FLY_PITCH_DOWN_ONLY";
+pub const VEH_FLY_ATTACK: &'static str = &"INPUT_VEH_FLY_ATTACK";
+pub const VEH_FLY_SELECT_TARGET_LEFT: &'static str = &"INPUT_VEH_FLY_SELECT_TARGET_LEFT";
+pub const VEH_FLY_SELECT_TARGET_RIGHT: &'static str = &"INPUT_VEH_FLY_SELECT_TARGET_RIGHT";
+pub const VEH_FLY_UNDERCARRIAGE: &'static str = &"INPUT_VEH_FLY_UNDERCARRIAGE";
+pub const VEH_GRAPPLING_HOOK: &'static str = &"INPUT_VEH_GRAPPLING_HOOK";
+pub const VEH_FLY_ATTACK_CAMERA: &'static str = &"INPUT_VEH_FLY_ATTACK_CAMERA";
+pub const VEH_FLY_MOUSE_CONTROL_OVERRIDE: &'static str = &"INPUT_VEH_FLY_MOUSE_CONTROL_OVERRIDE";

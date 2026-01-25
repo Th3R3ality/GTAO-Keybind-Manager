@@ -1,0 +1,12 @@
+pub const CATEGORY: &'static str = &"VEHICLE_SUB";
+pub const VEH_SUB_THROTTLE_UP: &'static str = &"INPUT_VEH_SUB_THROTTLE_UP";
+pub const VEH_SUB_THROTTLE_DOWN: &'static str = &"INPUT_VEH_SUB_THROTTLE_DOWN";
+pub const VEH_SUB_TURN_HARD_LEFT: &'static str = &"INPUT_VEH_SUB_TURN_HARD_LEFT";
+pub const VEH_SUB_TURN_HARD_RIGHT: &'static str = &"INPUT_VEH_SUB_TURN_HARD_RIGHT";
+pub const VEH_SUB_TURN_LEFT_ONLY: &'static str = &"INPUT_VEH_SUB_TURN_LEFT_ONLY";
+pub const VEH_SUB_TURN_RIGHT_ONLY: &'static str = &"INPUT_VEH_SUB_TURN_RIGHT_ONLY";
+pub const VEH_SUB_PITCH_UP_ONLY: &'static str = &"INPUT_VEH_SUB_PITCH_UP_ONLY";
+pub const VEH_SUB_PITCH_DOWN_ONLY: &'static str = &"INPUT_VEH_SUB_PITCH_DOWN_ONLY";
+pub const VEH_SUB_ASCEND: &'static str = &"INPUT_VEH_SUB_ASCEND";
+pub const VEH_SUB_DESCEND: &'static str = &"INPUT_VEH_SUB_DESCEND";
+pub const VEH_SUB_MOUSE_CONTROL_OVERRIDE: &'static str = &"INPUT_VEH_SUB_MOUSE_CONTROL_OVERRIDE";

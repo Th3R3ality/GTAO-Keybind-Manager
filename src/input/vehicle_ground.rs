@@ -1,0 +1,14 @@
+pub const CATEGORY: &'static str = &"VEHICLE_GROUND";
+pub const VEH_ACCELERATE: &'static str = &"INPUT_VEH_ACCELERATE";
+pub const VEH_BRAKE: &'static str = &"INPUT_VEH_BRAKE";
+pub const VEH_MOVE_LEFT_ONLY: &'static str = &"INPUT_VEH_MOVE_LEFT_ONLY";
+pub const VEH_MOVE_RIGHT_ONLY: &'static str = &"INPUT_VEH_MOVE_RIGHT_ONLY";
+pub const VEH_MOVE_UP_ONLY: &'static str = &"INPUT_VEH_MOVE_UP_ONLY";
+pub const VEH_MOVE_DOWN_ONLY: &'static str = &"INPUT_VEH_MOVE_DOWN_ONLY";
+pub const VEH_ATTACK: &'static str = &"INPUT_VEH_ATTACK";
+pub const VEH_AIM: &'static str = &"INPUT_VEH_AIM";
+pub const VEH_HANDBRAKE: &'static str = &"INPUT_VEH_HANDBRAKE";
+pub const VEH_HORN: &'static str = &"INPUT_VEH_HORN";
+pub const VEH_PUSHBIKE_SPRINT: &'static str = &"INPUT_VEH_PUSHBIKE_SPRINT";
+pub const VEH_PUSHBIKE_FRONT_BRAKE: &'static str = &"INPUT_VEH_PUSHBIKE_FRONT_BRAKE";
+pub const VEH_MOUSE_CONTROL_OVERRIDE: &'static str = &"INPUT_VEH_MOUSE_CONTROL_OVERRIDE";

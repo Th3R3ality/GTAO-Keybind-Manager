@@ -1,0 +1,12 @@
+pub const CATEGORY: &'static str = &"VEHICLE_GROUND_ONLINE";
+pub const VEH_HYDRAULICS_CONTROL_TOGGLE: &'static str = &"INPUT_VEH_HYDRAULICS_CONTROL_TOGGLE";
+pub const VEH_MELEE_HOLD: &'static str = &"INPUT_VEH_MELEE_HOLD";
+pub const VEH_MELEE_LEFT: &'static str = &"INPUT_VEH_MELEE_LEFT";
+pub const VEH_MELEE_RIGHT: &'static str = &"INPUT_VEH_MELEE_RIGHT";
+pub const VEH_BIKE_WINGS: &'static str = &"INPUT_VEH_BIKE_WINGS";
+pub const VEH_TRANSFORM: &'static str = &"INPUT_VEH_TRANSFORM";
+pub const VEH_PARACHUTE: &'static str = &"INPUT_VEH_PARACHUTE";
+pub const VEH_CAR_JUMP: &'static str = &"INPUT_VEH_CAR_JUMP";
+pub const VEH_ROCKET_BOOST: &'static str = &"INPUT_VEH_ROCKET_BOOST";
+pub const VEH_SHIFT_GEAR_UP: &'static str = &"INPUT_VEH_SHIFT_GEAR_UP";
+pub const VEH_SHIFT_GEAR_DOWN: &'static str = &"INPUT_VEH_SHIFT_GEAR_DOWN";

@@ -1,0 +1,16 @@
+pub const CATEGORY: &'static str = &"VEHICLE_GENERAL";
+pub const VEH_EXIT: &'static str = &"INPUT_VEH_EXIT";
+pub const VEH_SELECT_NEXT_WEAPON: &'static str = &"INPUT_VEH_SELECT_NEXT_WEAPON";
+pub const VEH_SELECT_PREV_WEAPON: &'static str = &"INPUT_VEH_SELECT_PREV_WEAPON";
+pub const VEH_LOOK_BEHIND: &'static str = &"INPUT_VEH_LOOK_BEHIND";
+pub const VEH_NEXT_RADIO: &'static str = &"INPUT_VEH_NEXT_RADIO";
+pub const VEH_PREV_RADIO: &'static str = &"INPUT_VEH_PREV_RADIO";
+pub const VEH_NEXT_RADIO_TRACK: &'static str = &"INPUT_VEH_NEXT_RADIO_TRACK";
+pub const VEH_PREV_RADIO_TRACK: &'static str = &"INPUT_VEH_PREV_RADIO_TRACK";
+pub const VEH_CIN_CAM: &'static str = &"INPUT_VEH_CIN_CAM";
+pub const VEH_RADIO_WHEEL: &'static str = &"INPUT_VEH_RADIO_WHEEL";
+pub const CINEMATIC_SLOWMO: &'static str = &"INPUT_CINEMATIC_SLOWMO";
+pub const VEH_DUCK: &'static str = &"INPUT_VEH_DUCK";
+pub const VEH_SLOWMO_UP_ONLY: &'static str = &"INPUT_VEH_SLOWMO_UP_ONLY";
+pub const VEH_SLOWMO_DOWN_ONLY: &'static str = &"INPUT_VEH_SLOWMO_DOWN_ONLY";
+pub const VEH_HEADLIGHT: &'static str = &"INPUT_VEH_HEADLIGHT";
