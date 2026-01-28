@@ -1,4 +1,4 @@
-use std::fmt::format;
+use std::fmt::{self};
 use std::path::PathBuf;
 use std::fs;
 use std::io::{Error, ErrorKind};
@@ -10,9 +10,7 @@ pub struct State {
 }
 #[derive(Debug, Clone)]
 pub enum Message {
-    Increment,
-    Decrement,
-    Reset,
+    ProfileSelected(Profile),
 }
 
 impl State {
@@ -57,7 +55,7 @@ impl State {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Profile {
     pub name: String,
     pub path: PathBuf,
@@ -69,5 +67,11 @@ impl Profile{
             name: name,
             path: xml_path,
         }
+    }
+}
+
+impl fmt::Display for Profile{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.name)
     }
 }

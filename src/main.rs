@@ -2,6 +2,8 @@ pub mod keybind_manager;
 pub mod gui;
 pub mod keycode;
 pub mod input;
+pub mod screen;
+pub mod asset;
 
 use rfd::FileDialog;
 
