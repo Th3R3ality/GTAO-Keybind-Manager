@@ -12,7 +12,7 @@ pub fn main() {
         .set_title("Rockstar Profiles Folder")
         .pick_folder()
         .unwrap();
-
+    
     let state = keybind_manager::State::new(&profiles_folder);
 
     let _res = gui::run(state);

@@ -59,6 +59,7 @@ impl State {
 pub struct Profile {
     pub name: String,
     pub path: PathBuf,
+    pub keybinds: Option<Vec<(usize, usize, usize)>>,
 }
 
 impl Profile{
@@ -66,7 +67,11 @@ impl Profile{
         Profile{
             name: name,
             path: xml_path,
+            keybinds: None,
         }
+    }
+    pub fn load_xml(){
+
     }
 }
 

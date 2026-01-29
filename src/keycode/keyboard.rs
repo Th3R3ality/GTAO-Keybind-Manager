@@ -252,8 +252,8 @@ pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
 	KEY_COMMA, //
 	KEY_MINUS, //-
 	KEY_PERIOD, //.
-	KEY_SLASH, ///
-	KEY_OEM_2, ///
+	KEY_SLASH, // /
+	KEY_OEM_2, // /
 	KEY_OEM_3, //`
 	KEY_GRAVE, //`
 	KEY_LBRACKET, //[

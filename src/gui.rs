@@ -1,12 +1,8 @@
-use std::default;
-
 use crate::keybind_manager;
 use crate::keybind_manager::State;
 use crate::keybind_manager::Message;
 
-use crate::input;
 use crate::keycode;
-use crate::screen;
 use crate::asset;
 
 use iced::Border;
@@ -15,14 +11,12 @@ use iced::widget::container::{
 };
 use iced::window;
 use iced::{
-    window::Icon,
     Element,
     Task,
     Theme,
     widget::{
         pick_list,
-        image,
-        container, button, column, row, scrollable, stack, text
+        container, column, row, scrollable, stack, text
     }
 };
 
@@ -40,6 +34,11 @@ pub fn run(state: State) -> iced::Result {
 }
 
 fn update(state: &mut State, message: Message) -> Task<Message> {
+    match message{
+        Message::ProfileSelected(profile) => {
+            state.current_profile = Some(profile);
+        }
+    }
 
     Task::none()
 }
@@ -73,35 +72,34 @@ fn view(state: &State) -> Element<'_, Message> {
             }
         })
     ;
-    
-    
+
     let background: Element<Message> = scrollable(
         column![]
-        .extend(keycode::keyboard::ALL.iter().map(|code| text((*code).1).into()))
-        ,
+        .extend(
+            keycode::KEYCODES.iter().flat_map(|category|
+                category.iter().enumerate().map(|(i, code)|
+                    if i == 0{
+                        text!("{} - {}", code.1, code.2).size(28).into()
+                    }
+                    else {
+                        row![
+                        container(text(code.1)).style(container::bordered_box).align_x(iced::Left),
+                        container(text(code.2)).style(container::bordered_box).align_x(iced::Right).width(iced::Fill),
+                        ].width(iced::Fill).padding(5).into()
+                    }
+                )
+            )
+        ),
     )
     .width(iced::Fill)
     .height(iced::Fill)
     .into();
 
-
-    let lalala =
-        column![
-            
-            text(format!("Discovered Profiles: {}", state.available_profiles.len()))
-            .size(40)
-            .width(iced::Length::Fill)
-            ,
-            ].align_x(iced::alignment::Horizontal::Right)
-            .extend(
-            state.available_profiles.iter().map(|p| text(format!("lel {}", p.name.clone())).into())
-            )
-            ;
-    
+   
 
     column![
-    header.height(iced::FillPortion(4)),
-    stack!(background, lalala).height(iced::FillPortion(14)),
+        header.height(iced::FillPortion(1)),
+        stack!(background).height(iced::FillPortion(9)),
     ]
     .into()
 }
