@@ -17,7 +17,7 @@ use iced::{
     Theme,
     widget::{
         pick_list,
-        container, column, row, scrollable, stack, text
+        container, column, row, scrollable, text
     }
 };
 
@@ -40,7 +40,12 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
             let res = profile.load_xml().err();
             match res {
                 Some(err) => println!("Error: {} | {}", err.0, err.1),
-                None => state.current_profile = Some(profile),
+                None => {
+                    if let Err(err) = profile.write_xml(){
+                        println!("Error writing xml '{}': {} | {}", profile.name, err.0, err.1);
+                    }
+                    state.current_profile = Some(profile);
+                },
             }
         }
     }
@@ -63,26 +68,29 @@ fn view(state: &State) -> Element<'_, Message> {
             ).height(iced::Fill).align_y(iced::Center),
         ]
     )
-        .width(iced::Fill)
-        .padding(10)
-        .style(|theme: &Theme| {
-            let palette = theme.extended_palette();
-            Style {
-                border: Border { 
-                    width: 2.0, 
-                    color: palette.background.weak.color,
-                    ..Border::default()
-                 },
-                ..Style::default()
-            }
-        })
-    ;
+    .width(iced::Fill)
+    .padding(10)
+    .style(|theme: &Theme| {
+        let palette = theme.extended_palette();
+        Style {
+            border: Border { 
+                width: 2.0, 
+                color: palette.background.weak.color,
+                ..Border::default()
+                },
+            ..Style::default()
+        }
+    });
 
     let mut background_column: iced::widget::Column<'_, Message> = column![];
     if let Some(profile) = &state.current_profile {
         if let Some(keybinds) = &profile.keybinds {
+            let mut keybinds_sorted = keybinds.clone();
+            keybinds_sorted.sort_by_key(|keybind|
+                (keybind.1, keybind.0)
+            );
             background_column = background_column.extend(
-                keybinds.iter().map(|keybind|{
+                keybinds_sorted.iter().map(|keybind|{
 
                     match (
                         input::from_index(keybind.0),
@@ -97,10 +105,8 @@ fn view(state: &State) -> Element<'_, Message> {
             );
         }
     }
-
-    let background: Element<Message> = scrollable(
-        column![]
-        .push(background_column)
+    let content: Element<Message> = scrollable(
+        column![background_column]
     )
     .width(iced::Fill)
     .height(iced::Fill)
@@ -109,8 +115,8 @@ fn view(state: &State) -> Element<'_, Message> {
    
 
     column![
-        header.height(iced::FillPortion(1)),
-        stack!(background).height(iced::FillPortion(9)),
+        container(header).height(iced::FillPortion(1)),
+        container(content).height(iced::FillPortion(9)),
     ]
     .into()
 }

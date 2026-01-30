@@ -1,7 +1,7 @@
 use std::fmt::{self};
 use std::path::PathBuf;
 use std::fs;
-use std::io::{Error, ErrorKind};
+use std::io::{Error, ErrorKind, Write};
 
 use crate::{input, keycode};
 
@@ -19,14 +19,14 @@ pub enum Message {
 
 impl State {
     pub fn new(profiles_folder: &PathBuf) -> State {
-        let mut _new: State = State{
+        let mut new: State = State{
             available_profiles: Vec::new(),
             current_profile: None,
         };
 
-        let _ = _new.discover_profiles(profiles_folder);
+        let _ = new.discover_profiles(profiles_folder);
 
-        _new
+        return new
     }
     pub fn title(&self) -> String {
         let suffix = self
@@ -59,9 +59,7 @@ impl State {
     }
 }
 
-
 type Keybind = (usize, usize, usize);
-type KeybindBuilder = (Option<usize>, Option<usize>, Option<usize>);
 #[derive(Debug, Clone, PartialEq)]
 pub struct Profile {
     pub name: String,
@@ -121,16 +119,65 @@ impl Profile{
         }
     }
 
+    pub fn write_xml(&self) -> std::result::Result<(), (String, String)> {
+
+        let path = self.path.with_added_extension("txt");
+        let file = fs::OpenOptions::new()
+            .create(true)
+            .truncate(true)
+            .write(true)
+            .open(path.clone());
+
+        match file {
+            Err(_err) => return Err(("Can't Open file".to_owned(), format!("{}", path.display()))),
+            Ok(mut file) => {
+
+                let _ = file.write(format!("{}\n\n", USER_HEADER).as_bytes());
+                let _ = file.write(format!("{}\n", opening(USER_WRAPPER)).as_bytes());
+                let _ = file.write(format!("  {}\n", opening(USER_MAPPINGS)).as_bytes());
+
+                if let Some(keybinds) = &self.keybinds {
+
+                    for keybind in keybinds {
+                        match (
+                            input::from_index(keybind.0),
+                            keycode::category_from_index(keybind.1),
+                            keycode::keycode_from_indexes(keybind.1, keybind.2)
+                        ) {
+                            (Some(input), Some(category), Some(keycode)) => {
+                                let _ = file.write(format!("    {}\n", opening(USER_ITEM)).as_bytes());
+                                let _ = file.write(format!("      {}{}{}\n",
+                                    opening(USER_INPUT), input, closing(USER_INPUT)).as_bytes());
+                                let _ = file.write(format!("      {}{}{}\n",
+                                    opening(USER_SOURCE), category.0, closing(USER_SOURCE)).as_bytes());
+                                let _ = file.write(format!("      {}\n", opening(USER_PARAMS)).as_bytes());       
+                                let _ = file.write(format!("        {}{}{}\n",
+                                    opening(USER_ITEM), keycode.0, closing(USER_ITEM)).as_bytes());
+                                let _ = file.write(format!("      {}\n", closing(USER_PARAMS)).as_bytes());       
+                                
+                                let _ = file.write(format!("    {}\n", closing(USER_ITEM)).as_bytes());       
+                            },
+                            _ => return Err(("While writing xml".to_owned(), "keybind codes incomplete/not found".to_owned())),
+                        }
+                    }
+                }
+
+
+                let _ = file.write(format!("  {}\n", closing(USER_MAPPINGS)).as_bytes());
+                let _ = file.write(format!("{}", closing(USER_WRAPPER)).as_bytes());
+            },
+        }
+        
+        Ok(())
+    }
+
     pub fn load_xml(&mut self) -> std::result::Result<(), (String, String)> {
-        let lines: Vec<String> = fs::read_to_string(self.path.clone())
+        let lines: Vec<String> = fs::read_to_string(&self.path)
             .unwrap()
             .lines()
             .map(String::from)
             .collect();
 
-        println!("profile: {}", self.name);
-
-        
         let mut iter= lines.iter().enumerate();
         
         while let Some((_, line)) = iter.next() {
