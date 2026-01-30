@@ -16,23 +16,25 @@ pub const RLEFT: &'static(&'static str, &'static str, &'static str) = &("RLEFT",
 pub const SELECT: &'static(&'static str, &'static str, &'static str) = &("SELECT", "SELECT", "Change View / Share");
 pub const START: &'static(&'static str, &'static str, &'static str) = &("START", "START", "Menu / Options");
 pub const TOUCH: &'static(&'static str, &'static str, &'static str) = &("TOUCH", "TOUCH", "Touchpad (?)");
+pub const NULL: &'static(&'static str, &'static str, &'static str) = &("KEY_NULL", "NULL", "Unbound"); // hardcoded in keycodes_to_rust.py
 pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
-	IOMS_PAD_DEBUGBUTTON, //Controller button input (debug interface
-	L1, //Left Shoulder Button
-	R1, //Right Shoulder Button
-	L2, //Left Trigger
-	R2, //Right Trigger
-	L3, //Left Stick Press
-	R3, //Right Stick Press
-	LUP, //D-pad Up
-	LRIGHT, //D-pad Right
-	LDOWN, //D-pad Down
-	LLEFT, //D-pad Left
-	RUP, //Y / Triangle
-	RRIGHT, //B / Circle
-	RDOWN, //A / Cross
-	RLEFT, //X / Square
-	SELECT, //Change View / Share
-	START, //Menu / Options
-	TOUCH, //Touchpad (?)
+	IOMS_PAD_DEBUGBUTTON, // Controller button input (debug interface
+	L1, // Left Shoulder Button
+	R1, // Right Shoulder Button
+	L2, // Left Trigger
+	R2, // Right Trigger
+	L3, // Left Stick Press
+	R3, // Right Stick Press
+	LUP, // D-pad Up
+	LRIGHT, // D-pad Right
+	LDOWN, // D-pad Down
+	LLEFT, // D-pad Left
+	RUP, // Y / Triangle
+	RRIGHT, // B / Circle
+	RDOWN, // A / Cross
+	RLEFT, // X / Square
+	SELECT, // Change View / Share
+	START, // Menu / Options
+	TOUCH, // Touchpad (?)
+	NULL, // hardcoded in keycodes_to_rust.py
 ];

@@ -13,6 +13,15 @@ def main():
             for input in category_node[0]:
                 print("\t"+input.text)
                 file.write(f"pub const {input.text.partition("_")[2] or input.text}: &'static str = &\"{input.text}\";\n")
+
+            file.write("\n")
+
+            file.write("pub const ALL: &'static[&'static str] = &[\n")
+            file.write(f"\tCATEGORY, // {category}\n")
+            file.write(f"\t{input.text.partition("_")[2] or input.text},// {input.text}\n")
+            for input in category_node[0]:
+                file.write(f"\t{input.text.partition("_")[2] or input.text},// {input.text}\n")
+            file.write("];\n")
         
 
 if __name__ == "__main__":

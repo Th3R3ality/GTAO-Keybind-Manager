@@ -16,23 +16,25 @@ pub const RLEFT_INDEX: &'static(&'static str, &'static str, &'static str) = &("R
 pub const SELECT_INDEX: &'static(&'static str, &'static str, &'static str) = &("SELECT_INDEX", "INDEX", "Change View / Share");
 pub const START_INDEX: &'static(&'static str, &'static str, &'static str) = &("START_INDEX", "INDEX", "Menu / Options");
 pub const TOUCH_INDEX: &'static(&'static str, &'static str, &'static str) = &("TOUCH_INDEX", "INDEX", "Touchpad (?)");
+pub const NULL: &'static(&'static str, &'static str, &'static str) = &("KEY_NULL", "NULL", "Unbound"); // hardcoded in keycodes_to_rust.py
 pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
-	IOMS_PAD_DIGITALBUTTONANY, //Controller button input (no known difference from PAD_DIGITALBUTTON)
-	L1_INDEX, //Left Shoulder Button
-	R1_INDEX, //Right Shoulder Button
-	L2_INDEX, //Left Trigger (considered \"pressed\" half way through the travel of the trigger)
-	R2_INDEX, //Right Trigger (considered \"pressed\" half way through the travel of the trigger)
-	L3_INDEX, //Left Stick Press
-	R3_INDEX, //Right Stick Press
-	LUP_INDEX, //D-pad Up
-	LRIGHT_INDEX, //D-pad Right
-	LDOWN_INDEX, //D-pad Down
-	LLEFT_INDEX, //D-pad Left
-	RUP_INDEX, //Y / Triangle
-	RRIGHT_INDEX, //B / Circle
-	RDOWN_INDEX, //A / Cross
-	RLEFT_INDEX, //X / Square
-	SELECT_INDEX, //Change View / Share
-	START_INDEX, //Menu / Options
-	TOUCH_INDEX, //Touchpad (?)
+	IOMS_PAD_DIGITALBUTTONANY, // Controller button input (no known difference from PAD_DIGITALBUTTON)
+	L1_INDEX, // Left Shoulder Button
+	R1_INDEX, // Right Shoulder Button
+	L2_INDEX, // Left Trigger (considered \"pressed\" half way through the travel of the trigger)
+	R2_INDEX, // Right Trigger (considered \"pressed\" half way through the travel of the trigger)
+	L3_INDEX, // Left Stick Press
+	R3_INDEX, // Right Stick Press
+	LUP_INDEX, // D-pad Up
+	LRIGHT_INDEX, // D-pad Right
+	LDOWN_INDEX, // D-pad Down
+	LLEFT_INDEX, // D-pad Left
+	RUP_INDEX, // Y / Triangle
+	RRIGHT_INDEX, // B / Circle
+	RDOWN_INDEX, // A / Cross
+	RLEFT_INDEX, // X / Square
+	SELECT_INDEX, // Change View / Share
+	START_INDEX, // Menu / Options
+	TOUCH_INDEX, // Touchpad (?)
+	NULL, // hardcoded in keycodes_to_rust.py
 ];

@@ -15,22 +15,24 @@ pub const IOM_AXIS_Y_UP: &'static(&'static str, &'static str, &'static str) = &(
 pub const IOM_AXIS_Y_DOWN: &'static(&'static str, &'static str, &'static str) = &("IOM_AXIS_Y_DOWN", "AXIS_Y_DOWN", "Mouse Y Axis (Down Only)");
 pub const BASIC_MOUSE_AXIS_MAX: &'static(&'static str, &'static str, &'static str) = &("BASIC_MOUSE_AXIS_MAX", "MOUSE_AXIS_MAX", "unknown");
 pub const MOUSE_AXIS_MAX: &'static(&'static str, &'static str, &'static str) = &("MOUSE_AXIS_MAX", "AXIS_MAX", "unknown");
+pub const NULL: &'static(&'static str, &'static str, &'static str) = &("KEY_NULL", "NULL", "Unbound"); // hardcoded in keycodes_to_rust.py
 pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
-	IOMS_MOUSE_NORMALIZED, //Mouse axis input (normalized)
-	IOM_AXIS_X, //Mouse X Axis
-	IOM_AXIS_Y, //Mouse Y Axis
-	IOM_AXIS_WHEEL, //Mouse Wheel Axis
-	IOM_AXIS_WHEEL_DELTA, //Mouse Wheel Axis Delta
-	IOM_AXIS_WHEEL_RELATIVE, //Mouse Wheel Axis Relative
-	IOM_IAXIS_X, //Mouse X Axis (Inverted)
-	IOM_IAXIS_Y, //Mouse Y Axis (Inverted)
-	IOM_IAXIS_WHEEL, //Mouse Wheel Axis (Inverted)
-	IOM_IAXIS_WHEEL_DELTA, //Mouse Wheel Axis Delta (Inverted)
-	IOM_IAXIS_WHEEL_RELATIVE, //Mouse Wheel Axis Relative (Inverted)
-	IOM_AXIS_X_LEFT, //Mouse X Axis (Left Only)
-	IOM_AXIS_X_RIGHT, //Mouse X Axis (Right Only)
-	IOM_AXIS_Y_UP, //Mouse Y Axis (Up Only)
-	IOM_AXIS_Y_DOWN, //Mouse Y Axis (Down Only)
-	BASIC_MOUSE_AXIS_MAX, //unknown
-	MOUSE_AXIS_MAX, //unknown
+	IOMS_MOUSE_NORMALIZED, // Mouse axis input (normalized)
+	IOM_AXIS_X, // Mouse X Axis
+	IOM_AXIS_Y, // Mouse Y Axis
+	IOM_AXIS_WHEEL, // Mouse Wheel Axis
+	IOM_AXIS_WHEEL_DELTA, // Mouse Wheel Axis Delta
+	IOM_AXIS_WHEEL_RELATIVE, // Mouse Wheel Axis Relative
+	IOM_IAXIS_X, // Mouse X Axis (Inverted)
+	IOM_IAXIS_Y, // Mouse Y Axis (Inverted)
+	IOM_IAXIS_WHEEL, // Mouse Wheel Axis (Inverted)
+	IOM_IAXIS_WHEEL_DELTA, // Mouse Wheel Axis Delta (Inverted)
+	IOM_IAXIS_WHEEL_RELATIVE, // Mouse Wheel Axis Relative (Inverted)
+	IOM_AXIS_X_LEFT, // Mouse X Axis (Left Only)
+	IOM_AXIS_X_RIGHT, // Mouse X Axis (Right Only)
+	IOM_AXIS_Y_UP, // Mouse Y Axis (Up Only)
+	IOM_AXIS_Y_DOWN, // Mouse Y Axis (Down Only)
+	BASIC_MOUSE_AXIS_MAX, // unknown
+	MOUSE_AXIS_MAX, // unknown
+	NULL, // hardcoded in keycodes_to_rust.py
 ];

@@ -35,8 +35,12 @@ pub fn run(state: State) -> iced::Result {
 
 fn update(state: &mut State, message: Message) -> Task<Message> {
     match message{
-        Message::ProfileSelected(profile) => {
-            state.current_profile = Some(profile);
+        Message::ProfileSelected(mut profile) => {
+            let res = profile.load_xml().err();
+            match res {
+                Some(err) => println!("Error: {} | {}", err.0, err.1),
+                None => state.current_profile = Some(profile),
+            }
         }
     }
 

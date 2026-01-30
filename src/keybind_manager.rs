@@ -3,6 +3,10 @@ use std::path::PathBuf;
 use std::fs;
 use std::io::{Error, ErrorKind};
 
+use crate::{input, keycode};
+
+const VERSION: &str = &"0.1";
+
 #[derive(Debug, Clone)]
 pub struct State {
     pub available_profiles: Vec<Profile>,
@@ -28,9 +32,9 @@ impl State {
         let suffix = self
             .current_profile
             .as_ref()
-            .map(|p| format!(" - Current Profile: {}", p.name))
+            .map(|p| format!(" | Current Profile: {}", p.name))
             .unwrap_or_default();
-        format!("GTAO Keybind Manager by Reality{}", suffix)
+        format!("GTAO Keybind Manager {} by Reality{}", VERSION, suffix)
     }
     fn discover_profiles(&mut self, profiles_folder: &PathBuf) -> std::io::Result<()>{
         for entry in fs::read_dir(profiles_folder)? {
@@ -55,11 +59,57 @@ impl State {
     }
 }
 
+
+type Keybind = (usize, usize, usize);
+type KeybindBuilder = (Option<usize>, Option<usize>, Option<usize>);
 #[derive(Debug, Clone, PartialEq)]
 pub struct Profile {
     pub name: String,
     pub path: PathBuf,
-    pub keybinds: Option<Vec<(usize, usize, usize)>>,
+    pub keybinds: Option<Vec<Keybind>>,
+}
+
+const USER_HEADER: &str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+const USER_WRAPPER: &str = "rage__ControlInput__ControlSettings";
+
+const USER_MAPPINGS: &str = "Mappings";
+const USER_INPUT: &str = "Input";
+const USER_SOURCE: &str = "Source";
+const USER_PARAMS: &str = "Parameters";
+const USER_ITEM: &str = "Item";
+
+fn opening(tag: &str) -> String{
+    format!("<{}>", tag)
+}
+fn closing(tag: &str) -> String{
+    format!("</{}>", tag)
+}
+fn extract_xml_value(enclosed_value: &str, tag: &str) -> Option<String> {
+    let res = enclosed_value
+        .strip_prefix(&opening(tag))?
+        .strip_suffix(&closing(tag));
+
+    match res{
+        Some(res) => Some(res.to_owned()),
+        _ => None,
+    }
+}
+
+fn builder_to_string<T: ToString>(builder: (Option<T>, Option<T>, Option<T>)) -> String {
+    let input_string = match builder.0 {
+        Some(input) => input.to_string(),
+        None => "None".to_owned(),
+    };
+    let category_string = match builder.1 {
+        Some(category) => category.to_string(),
+        None => "None".to_owned(),
+    };
+    let keycode_string = match builder.2 {
+        Some(keycode) => keycode.to_string(),
+        None => "None".to_owned(),
+    };
+
+    return format!("builder: {} {} {}", input_string, category_string, keycode_string)
 }
 
 impl Profile{
@@ -70,8 +120,113 @@ impl Profile{
             keybinds: None,
         }
     }
-    pub fn load_xml(){
 
+    pub fn load_xml(&mut self) -> std::result::Result<(), (String, String)> {
+        let lines: Vec<String> = fs::read_to_string(self.path.clone())
+            .unwrap()
+            .lines()
+            .map(String::from)
+            .collect();
+
+        println!("profile: {}", self.name);
+
+        
+        let mut iter= lines.iter().enumerate();
+        
+        while let Some((_, line)) = iter.next() {
+            if line.trim() == &opening(USER_MAPPINGS) {
+                break;
+            }
+        }
+        
+        let mut keybind_collector: Vec<Keybind> = Vec::new();
+        let mut keybind_builder: (Option<usize>, Option<usize>, Option<usize>) = (None, None, None);
+        let mut keybind_builder_names: (Option<String>, Option<String>, Option<String>) = (None, None, None);
+        while let Some((_, line)) = iter.next()
+        {
+            let trimmed = line.trim();
+            if trimmed == &closing(USER_MAPPINGS) {
+                break;
+            }
+            //println!("line: {}", line);
+            //println!("trimmed: {}", trimmed);
+            match trimmed {
+                s if s.starts_with(&opening(USER_ITEM)) => {
+                    keybind_builder = (None, None, None);
+                    keybind_builder_names = (None, None, None);
+                },
+                s if s.starts_with(&opening(USER_INPUT)) => {
+                    let Some(value) = extract_xml_value(trimmed, USER_INPUT) else {
+                        return Err((format!("None value while extracting '{}'", USER_INPUT), "".to_owned()))
+                    };
+                    keybind_builder.0 = match input::get_index(&value) {
+                        Some(index) => {
+                            keybind_builder_names.0 = Some(value);
+                            Some(index)
+                        },
+                        None => None,
+                    };
+
+                },
+                s if s.starts_with(&opening(USER_SOURCE)) => {
+                    let Some(value) = extract_xml_value(trimmed, USER_SOURCE) else {
+                        return Err((format!("None value while extracting '{}'", USER_SOURCE), "".to_owned()))
+                    };
+                    keybind_builder.1 = match keycode::get_category_index(&value) {
+                        Some(index) => {
+                            keybind_builder_names.1 = Some(value);
+                            Some(index)
+                        },
+                        None => None,
+                    };
+                },
+                s if s.starts_with(&opening(USER_PARAMS)) => {
+                    match iter.next(){
+                        Some((_, item_line)) => {
+                            let Some(value) = extract_xml_value(item_line.trim(), USER_ITEM) else {
+                                return Err((format!("None value while extracting '{}'", USER_ITEM), "".to_owned()))
+                            };
+
+                            let category_index = match keybind_builder.1 {
+                                Some(category) => category,
+                                None => {
+                                    return Err(("Trying to get keycode without category".to_owned(), builder_to_string(keybind_builder_names)))
+                                }
+                            };
+                            keybind_builder.2 = match keycode::get_keycode_index_with_category_index(
+                                    category_index,
+                                    &value) {
+                                Some(index) => {
+                                    keybind_builder_names.2 = Some(value);
+                                    Some(index)
+                                },
+                                None => None,
+                            };
+                        },
+                        None => break,
+                    }
+                    match iter.next() {
+                        Some((_, params_end)) if params_end.trim() == &closing(USER_PARAMS) => (),
+                        None | _ => break,
+                    }
+                },
+                s if s.starts_with(&closing(USER_ITEM)) => {
+                    match keybind_builder {
+                        (Some(input), Some(category), Some(keycode)) => {
+                            keybind_collector.push((input, category, keycode));
+                        },
+                        _ => {
+                            return Err(("Incomplete Keybind".to_owned(), builder_to_string(keybind_builder_names)))
+                        },
+                    }
+                    keybind_builder = (None, None, None);
+                },
+                _ => break,
+            }
+        }
+
+        self.keybinds = Some(keybind_collector);
+        Ok(())
     }
 }
 

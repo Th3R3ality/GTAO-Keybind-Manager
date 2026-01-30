@@ -15,22 +15,24 @@ pub const IOM_POV4_UP: &'static(&'static str, &'static str, &'static str) = &("I
 pub const IOM_POV4_RIGHT: &'static(&'static str, &'static str, &'static str) = &("IOM_POV4_RIGHT", "POV4_RIGHT", "hardware dependent");
 pub const IOM_POV4_DOWN: &'static(&'static str, &'static str, &'static str) = &("IOM_POV4_DOWN", "POV4_DOWN", "hardware dependent");
 pub const IOM_POV4_LEFT: &'static(&'static str, &'static str, &'static str) = &("IOM_POV4_LEFT", "POV4_LEFT", "hardware dependent");
+pub const NULL: &'static(&'static str, &'static str, &'static str) = &("KEY_NULL", "NULL", "Unbound"); // hardcoded in keycodes_to_rust.py
 pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
-	IOMS_JOYSTICK_POV, //Joystick / flight stick point of view input
-	IOM_POV1_UP, //hardware dependent
-	IOM_POV1_RIGHT, //hardware dependent
-	IOM_POV1_DOWN, //hardware dependent
-	IOM_POV1_LEFT, //hardware dependent
-	IOM_POV2_UP, //hardware dependent
-	IOM_POV2_RIGHT, //hardware dependent
-	IOM_POV2_DOWN, //hardware dependent
-	IOM_POV2_LEFT, //hardware dependent
-	IOM_POV3_UP, //hardware dependent
-	IOM_POV3_RIGHT, //hardware dependent
-	IOM_POV3_DOWN, //hardware dependent
-	IOM_POV3_LEFT, //hardware dependent
-	IOM_POV4_UP, //hardware dependent
-	IOM_POV4_RIGHT, //hardware dependent
-	IOM_POV4_DOWN, //hardware dependent
-	IOM_POV4_LEFT, //hardware dependent
+	IOMS_JOYSTICK_POV, // Joystick / flight stick point of view input
+	IOM_POV1_UP, // hardware dependent
+	IOM_POV1_RIGHT, // hardware dependent
+	IOM_POV1_DOWN, // hardware dependent
+	IOM_POV1_LEFT, // hardware dependent
+	IOM_POV2_UP, // hardware dependent
+	IOM_POV2_RIGHT, // hardware dependent
+	IOM_POV2_DOWN, // hardware dependent
+	IOM_POV2_LEFT, // hardware dependent
+	IOM_POV3_UP, // hardware dependent
+	IOM_POV3_RIGHT, // hardware dependent
+	IOM_POV3_DOWN, // hardware dependent
+	IOM_POV3_LEFT, // hardware dependent
+	IOM_POV4_UP, // hardware dependent
+	IOM_POV4_RIGHT, // hardware dependent
+	IOM_POV4_DOWN, // hardware dependent
+	IOM_POV4_LEFT, // hardware dependent
+	NULL, // hardcoded in keycodes_to_rust.py
 ];

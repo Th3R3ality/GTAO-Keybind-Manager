@@ -134,141 +134,143 @@ pub const KEY_RAGE_EXTRA3: &'static(&'static str, &'static str, &'static str) = 
 pub const KEY_RAGE_EXTRA4: &'static(&'static str, &'static str, &'static str) = &("KEY_RAGE_EXTRA4", "RAGE_EXTRA4", "unknown");
 pub const KEY_CHATPAD_GREEN_SHIFT: &'static(&'static str, &'static str, &'static str) = &("KEY_CHATPAD_GREEN_SHIFT", "CHATPAD_GREEN_SHIFT", "Xbox Chatpad Green Button");
 pub const KEY_CHATPAD_ORANGE_SHIFT: &'static(&'static str, &'static str, &'static str) = &("KEY_CHATPAD_ORANGE_SHIFT", "CHATPAD_ORANGE_SHIFT", "Xbox Chatpad Orange Button");
+pub const NULL: &'static(&'static str, &'static str, &'static str) = &("KEY_NULL", "NULL", "Unbound"); // hardcoded in keycodes_to_rust.py
 pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
-	IOMS_KEYBOARD, //Keyboard input (including the Xbox Controller Chatpad)
-	KEY_BACK, //Backspace
-	KEY_TAB, //Tab
-	KEY_RETURN, //Enter
-	KEY_PAUSE, //Pause Break
-	KEY_CAPITAL, //Caps Lock
-	KEY_ESCAPE, //Escape
-	KEY_SPACE, //Space bar
-	KEY_PAGEUP, //Page Up
-	KEY_PRIOR, //Page Up
-	KEY_PAGEDOWN, //Page Down
-	KEY_NEXT, //Page Down
-	KEY_END, //End
-	KEY_HOME, //Home
-	KEY_LEFT, //Left Arrow
-	KEY_UP, //Up Arrow
-	KEY_RIGHT, //Right Arrow
-	KEY_DOWN, //Down Arrow
-	KEY_SYSRQ, //Print Screen
-	KEY_SNAPSHOT, //Print Screen
-	KEY_INSERT, //Insert
-	KEY_DELETE, //Delete
-	KEY_0, //0
-	KEY_1, //1
-	KEY_2, //2
-	KEY_3, //3
-	KEY_4, //4
-	KEY_5, //5
-	KEY_6, //6
-	KEY_7, //7
-	KEY_8, //8
-	KEY_9, //9
-	KEY_A, //A
-	KEY_B, //B
-	KEY_C, //C
-	KEY_D, //D
-	KEY_E, //E
-	KEY_F, //F
-	KEY_G, //G
-	KEY_H, //H
-	KEY_I, //I
-	KEY_J, //J
-	KEY_K, //K
-	KEY_L, //L
-	KEY_M, //M
-	KEY_N, //N
-	KEY_O, //O
-	KEY_P, //P
-	KEY_Q, //Q
-	KEY_R, //R
-	KEY_S, //S
-	KEY_T, //T
-	KEY_U, //U
-	KEY_V, //V
-	KEY_W, //W
-	KEY_X, //X
-	KEY_Y, //Y
-	KEY_Z, //Z
-	KEY_LWIN, //Left OS/Windows Key
-	KEY_RWIN, //Right OS/Windows Key
-	KEY_APPS, //Context Menu Key
-	KEY_NUMPAD0, //Numpad 0
-	KEY_NUMPAD1, //Numpad 1
-	KEY_NUMPAD2, //Numpad 2
-	KEY_NUMPAD3, //Numpad 3
-	KEY_NUMPAD4, //Numpad 4
-	KEY_NUMPAD5, //Numpad 5
-	KEY_NUMPAD6, //Numpad 6
-	KEY_NUMPAD7, //Numpad 7
-	KEY_NUMPAD8, //Numpad 8
-	KEY_NUMPAD9, //Numpad 9
-	KEY_MULTIPLY, //Numpad Multiply
-	KEY_ADD, //Numpad Plus
-	KEY_SUBTRACT, //Numpad Subtract
-	KEY_DECIMAL, //Numpad Decimal
-	KEY_DIVIDE, //Numpad Slash
-	KEY_NUMPADEQUALS, //Numpad Equals
-	KEY_NUMPADENTER, //Numpad Enter
-	KEY_F1, //F1
-	KEY_F2, //F2
-	KEY_F3, //F3
-	KEY_F4, //F4
-	KEY_F5, //F5
-	KEY_F6, //F6
-	KEY_F7, //F7
-	KEY_F8, //F8
-	KEY_F9, //F9
-	KEY_F10, //F10
-	KEY_F11, //F11
-	KEY_F12, //F12
-	KEY_F13, //F13
-	KEY_F14, //F14
-	KEY_F15, //F15
-	KEY_F16, //F16
-	KEY_F17, //F17
-	KEY_F18, //F18
-	KEY_F19, //F19
-	KEY_F20, //F20
-	KEY_F21, //F21
-	KEY_F22, //F22
-	KEY_F23, //F23
-	KEY_F24, //F24
-	KEY_NUMLOCK, //Num Lock
-	KEY_SCROLL, //Scroll Lock
-	KEY_LSHIFT, //Left Shift
-	KEY_RSHIFT, //Right Shift
-	KEY_LCONTROL, //Left Control
-	KEY_RCONTROL, //Right Control
-	KEY_LMENU, //Left Alt
-	KEY_RMENU, //Right Alt
-	KEY_OEM_1, //;
-	KEY_SEMICOLON, //;
-	KEY_EQUALS, //=
-	KEY_PLUS, //+
-	KEY_COMMA, //
-	KEY_MINUS, //-
-	KEY_PERIOD, //.
+	IOMS_KEYBOARD, // Keyboard input (including the Xbox Controller Chatpad)
+	KEY_BACK, // Backspace
+	KEY_TAB, // Tab
+	KEY_RETURN, // Enter
+	KEY_PAUSE, // Pause Break
+	KEY_CAPITAL, // Caps Lock
+	KEY_ESCAPE, // Escape
+	KEY_SPACE, // Space bar
+	KEY_PAGEUP, // Page Up
+	KEY_PRIOR, // Page Up
+	KEY_PAGEDOWN, // Page Down
+	KEY_NEXT, // Page Down
+	KEY_END, // End
+	KEY_HOME, // Home
+	KEY_LEFT, // Left Arrow
+	KEY_UP, // Up Arrow
+	KEY_RIGHT, // Right Arrow
+	KEY_DOWN, // Down Arrow
+	KEY_SYSRQ, // Print Screen
+	KEY_SNAPSHOT, // Print Screen
+	KEY_INSERT, // Insert
+	KEY_DELETE, // Delete
+	KEY_0, // 0
+	KEY_1, // 1
+	KEY_2, // 2
+	KEY_3, // 3
+	KEY_4, // 4
+	KEY_5, // 5
+	KEY_6, // 6
+	KEY_7, // 7
+	KEY_8, // 8
+	KEY_9, // 9
+	KEY_A, // A
+	KEY_B, // B
+	KEY_C, // C
+	KEY_D, // D
+	KEY_E, // E
+	KEY_F, // F
+	KEY_G, // G
+	KEY_H, // H
+	KEY_I, // I
+	KEY_J, // J
+	KEY_K, // K
+	KEY_L, // L
+	KEY_M, // M
+	KEY_N, // N
+	KEY_O, // O
+	KEY_P, // P
+	KEY_Q, // Q
+	KEY_R, // R
+	KEY_S, // S
+	KEY_T, // T
+	KEY_U, // U
+	KEY_V, // V
+	KEY_W, // W
+	KEY_X, // X
+	KEY_Y, // Y
+	KEY_Z, // Z
+	KEY_LWIN, // Left OS/Windows Key
+	KEY_RWIN, // Right OS/Windows Key
+	KEY_APPS, // Context Menu Key
+	KEY_NUMPAD0, // Numpad 0
+	KEY_NUMPAD1, // Numpad 1
+	KEY_NUMPAD2, // Numpad 2
+	KEY_NUMPAD3, // Numpad 3
+	KEY_NUMPAD4, // Numpad 4
+	KEY_NUMPAD5, // Numpad 5
+	KEY_NUMPAD6, // Numpad 6
+	KEY_NUMPAD7, // Numpad 7
+	KEY_NUMPAD8, // Numpad 8
+	KEY_NUMPAD9, // Numpad 9
+	KEY_MULTIPLY, // Numpad Multiply
+	KEY_ADD, // Numpad Plus
+	KEY_SUBTRACT, // Numpad Subtract
+	KEY_DECIMAL, // Numpad Decimal
+	KEY_DIVIDE, // Numpad Slash
+	KEY_NUMPADEQUALS, // Numpad Equals
+	KEY_NUMPADENTER, // Numpad Enter
+	KEY_F1, // F1
+	KEY_F2, // F2
+	KEY_F3, // F3
+	KEY_F4, // F4
+	KEY_F5, // F5
+	KEY_F6, // F6
+	KEY_F7, // F7
+	KEY_F8, // F8
+	KEY_F9, // F9
+	KEY_F10, // F10
+	KEY_F11, // F11
+	KEY_F12, // F12
+	KEY_F13, // F13
+	KEY_F14, // F14
+	KEY_F15, // F15
+	KEY_F16, // F16
+	KEY_F17, // F17
+	KEY_F18, // F18
+	KEY_F19, // F19
+	KEY_F20, // F20
+	KEY_F21, // F21
+	KEY_F22, // F22
+	KEY_F23, // F23
+	KEY_F24, // F24
+	KEY_NUMLOCK, // Num Lock
+	KEY_SCROLL, // Scroll Lock
+	KEY_LSHIFT, // Left Shift
+	KEY_RSHIFT, // Right Shift
+	KEY_LCONTROL, // Left Control
+	KEY_RCONTROL, // Right Control
+	KEY_LMENU, // Left Alt
+	KEY_RMENU, // Right Alt
+	KEY_OEM_1, // ;
+	KEY_SEMICOLON, // ;
+	KEY_EQUALS, // =
+	KEY_PLUS, // +
+	KEY_COMMA, // 
+	KEY_MINUS, // -
+	KEY_PERIOD, // .
 	KEY_SLASH, // /
 	KEY_OEM_2, // /
-	KEY_OEM_3, //`
-	KEY_GRAVE, //`
-	KEY_LBRACKET, //[
-	KEY_OEM_4, //[
-	KEY_OEM_5, //\\
-	KEY_BACKSLASH, //\\
-	KEY_OEM_6, //]
-	KEY_RBRACKET, //]
-	KEY_APOSTROPHE, //'
-	KEY_OEM_7, //'
-	KEY_OEM_102, //The \"angle bracket key\" or the backslash key on an RT 102-key keyboard
-	KEY_RAGE_EXTRA1, //unknown
-	KEY_RAGE_EXTRA2, //unknown
-	KEY_RAGE_EXTRA3, //unknown
-	KEY_RAGE_EXTRA4, //unknown
-	KEY_CHATPAD_GREEN_SHIFT, //Xbox Chatpad Green Button
-	KEY_CHATPAD_ORANGE_SHIFT, //Xbox Chatpad Orange Button
+	KEY_OEM_3, // `
+	KEY_GRAVE, // `
+	KEY_LBRACKET, // [
+	KEY_OEM_4, // [
+	KEY_OEM_5, // \\
+	KEY_BACKSLASH, // \\
+	KEY_OEM_6, // ]
+	KEY_RBRACKET, // ]
+	KEY_APOSTROPHE, // '
+	KEY_OEM_7, // '
+	KEY_OEM_102, // The \"angle bracket key\" or the backslash key on an RT 102-key keyboard
+	KEY_RAGE_EXTRA1, // unknown
+	KEY_RAGE_EXTRA2, // unknown
+	KEY_RAGE_EXTRA3, // unknown
+	KEY_RAGE_EXTRA4, // unknown
+	KEY_CHATPAD_GREEN_SHIFT, // Xbox Chatpad Green Button
+	KEY_CHATPAD_ORANGE_SHIFT, // Xbox Chatpad Orange Button
+	NULL, // hardcoded in keycodes_to_rust.py
 ];

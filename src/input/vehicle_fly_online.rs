@@ -2,3 +2,11 @@ pub const CATEGORY: &'static str = &"VEHICLE_FLY_ONLINE";
 pub const VEH_FLY_BOOST: &'static str = &"INPUT_VEH_FLY_BOOST";
 pub const VEH_FLY_BOMB_BAY: &'static str = &"INPUT_VEH_FLY_BOMB_BAY";
 pub const VEH_FLY_COUNTER: &'static str = &"INPUT_VEH_FLY_COUNTER";
+
+pub const ALL: &'static[&'static str] = &[
+	CATEGORY, // VEHICLE_FLY_ONLINE
+	VEH_FLY_COUNTER,// INPUT_VEH_FLY_COUNTER
+	VEH_FLY_BOOST,// INPUT_VEH_FLY_BOOST
+	VEH_FLY_BOMB_BAY,// INPUT_VEH_FLY_BOMB_BAY
+	VEH_FLY_COUNTER,// INPUT_VEH_FLY_COUNTER
+];

@@ -31,38 +31,40 @@ pub const IOM_JOYSTICK_BUTTON29: &'static(&'static str, &'static str, &'static s
 pub const IOM_JOYSTICK_BUTTON30: &'static(&'static str, &'static str, &'static str) = &("IOM_JOYSTICK_BUTTON30", "JOYSTICK_BUTTON30", "hardware dependent");
 pub const IOM_JOYSTICK_BUTTON31: &'static(&'static str, &'static str, &'static str) = &("IOM_JOYSTICK_BUTTON31", "JOYSTICK_BUTTON31", "hardware dependent");
 pub const IOM_JOYSTICK_BUTTON32: &'static(&'static str, &'static str, &'static str) = &("IOM_JOYSTICK_BUTTON32", "JOYSTICK_BUTTON32", "hardware dependent");
+pub const NULL: &'static(&'static str, &'static str, &'static str) = &("KEY_NULL", "NULL", "Unbound"); // hardcoded in keycodes_to_rust.py
 pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
-	IOMS_JOYSTICK_BUTTON, //Joystick / flight stick button input
-	IOM_JOYSTICK_BUTTON1, //hardware dependent
-	IOM_JOYSTICK_BUTTON2, //hardware dependent
-	IOM_JOYSTICK_BUTTON3, //hardware dependent
-	IOM_JOYSTICK_BUTTON4, //hardware dependent
-	IOM_JOYSTICK_BUTTON5, //hardware dependent
-	IOM_JOYSTICK_BUTTON6, //hardware dependent
-	IOM_JOYSTICK_BUTTON7, //hardware dependent
-	IOM_JOYSTICK_BUTTON8, //hardware dependent
-	IOM_JOYSTICK_BUTTON9, //hardware dependent
-	IOM_JOYSTICK_BUTTON10, //hardware dependent
-	IOM_JOYSTICK_BUTTON11, //hardware dependent
-	IOM_JOYSTICK_BUTTON12, //hardware dependent
-	IOM_JOYSTICK_BUTTON13, //hardware dependent
-	IOM_JOYSTICK_BUTTON14, //hardware dependent
-	IOM_JOYSTICK_BUTTON15, //hardware dependent
-	IOM_JOYSTICK_BUTTON16, //hardware dependent
-	IOM_JOYSTICK_BUTTON17, //hardware dependent
-	IOM_JOYSTICK_BUTTON18, //hardware dependent
-	IOM_JOYSTICK_BUTTON19, //hardware dependent
-	IOM_JOYSTICK_BUTTON20, //hardware dependent
-	IOM_JOYSTICK_BUTTON21, //hardware dependent
-	IOM_JOYSTICK_BUTTON22, //hardware dependent
-	IOM_JOYSTICK_BUTTON23, //hardware dependent
-	IOM_JOYSTICK_BUTTON24, //hardware dependent
-	IOM_JOYSTICK_BUTTON25, //hardware dependent
-	IOM_JOYSTICK_BUTTON26, //hardware dependent
-	IOM_JOYSTICK_BUTTON27, //hardware dependent
-	IOM_JOYSTICK_BUTTON28, //hardware dependent
-	IOM_JOYSTICK_BUTTON29, //hardware dependent
-	IOM_JOYSTICK_BUTTON30, //hardware dependent
-	IOM_JOYSTICK_BUTTON31, //hardware dependent
-	IOM_JOYSTICK_BUTTON32, //hardware dependent
+	IOMS_JOYSTICK_BUTTON, // Joystick / flight stick button input
+	IOM_JOYSTICK_BUTTON1, // hardware dependent
+	IOM_JOYSTICK_BUTTON2, // hardware dependent
+	IOM_JOYSTICK_BUTTON3, // hardware dependent
+	IOM_JOYSTICK_BUTTON4, // hardware dependent
+	IOM_JOYSTICK_BUTTON5, // hardware dependent
+	IOM_JOYSTICK_BUTTON6, // hardware dependent
+	IOM_JOYSTICK_BUTTON7, // hardware dependent
+	IOM_JOYSTICK_BUTTON8, // hardware dependent
+	IOM_JOYSTICK_BUTTON9, // hardware dependent
+	IOM_JOYSTICK_BUTTON10, // hardware dependent
+	IOM_JOYSTICK_BUTTON11, // hardware dependent
+	IOM_JOYSTICK_BUTTON12, // hardware dependent
+	IOM_JOYSTICK_BUTTON13, // hardware dependent
+	IOM_JOYSTICK_BUTTON14, // hardware dependent
+	IOM_JOYSTICK_BUTTON15, // hardware dependent
+	IOM_JOYSTICK_BUTTON16, // hardware dependent
+	IOM_JOYSTICK_BUTTON17, // hardware dependent
+	IOM_JOYSTICK_BUTTON18, // hardware dependent
+	IOM_JOYSTICK_BUTTON19, // hardware dependent
+	IOM_JOYSTICK_BUTTON20, // hardware dependent
+	IOM_JOYSTICK_BUTTON21, // hardware dependent
+	IOM_JOYSTICK_BUTTON22, // hardware dependent
+	IOM_JOYSTICK_BUTTON23, // hardware dependent
+	IOM_JOYSTICK_BUTTON24, // hardware dependent
+	IOM_JOYSTICK_BUTTON25, // hardware dependent
+	IOM_JOYSTICK_BUTTON26, // hardware dependent
+	IOM_JOYSTICK_BUTTON27, // hardware dependent
+	IOM_JOYSTICK_BUTTON28, // hardware dependent
+	IOM_JOYSTICK_BUTTON29, // hardware dependent
+	IOM_JOYSTICK_BUTTON30, // hardware dependent
+	IOM_JOYSTICK_BUTTON31, // hardware dependent
+	IOM_JOYSTICK_BUTTON32, // hardware dependent
+	NULL, // hardcoded in keycodes_to_rust.py
 ];

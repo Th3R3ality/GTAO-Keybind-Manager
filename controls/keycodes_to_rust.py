@@ -107,15 +107,17 @@ def main():
                 code = data[1]
                 desc = data[2]
                 file.write(f"pub const {code}: &'static(&'static str, &'static str, &'static str) = &(\"{code}\", \"{stripped}\", \"{desc}\");\n")
-            
+            file.write("pub const NULL: &'static(&'static str, &'static str, &'static str) = &(\"KEY_NULL\", \"NULL\", \"Unbound\"); // hardcoded in keycodes_to_rust.py\n")
+
             #"ALL" list
             file.write("pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[\n")
             for data in out[category]:
                 stripped = data[0]
                 code = data[1]
                 desc = data[2]
-                file.write(f"\t{code}, //{desc}\n")
+                file.write(f"\t{code}, // {desc}\n")
             
+            file.write("\tNULL, // hardcoded in keycodes_to_rust.py\n")
             file.write("];\n")
     print("Done.")
 

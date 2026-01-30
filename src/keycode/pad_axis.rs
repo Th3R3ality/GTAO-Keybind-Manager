@@ -29,36 +29,38 @@ pub const IOM_AXIS_RY_UP: &'static(&'static str, &'static str, &'static str) = &
 pub const IOM_AXIS_RY_DOWN: &'static(&'static str, &'static str, &'static str) = &("IOM_AXIS_RY_DOWN", "AXIS_RY_DOWN", "unknown");
 pub const IOM_AXIS_RX_LEFT: &'static(&'static str, &'static str, &'static str) = &("IOM_AXIS_RX_LEFT", "AXIS_RX_LEFT", "unknown");
 pub const IOM_AXIS_RX_RIGHT: &'static(&'static str, &'static str, &'static str) = &("IOM_AXIS_RX_RIGHT", "AXIS_RX_RIGHT", "unknown");
+pub const NULL: &'static(&'static str, &'static str, &'static str) = &("KEY_NULL", "NULL", "Unbound"); // hardcoded in keycodes_to_rust.py
 pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
-	IOMS_PAD_AXIS, //Controller axis input
-	IOM_AXIS_LX, //unknown
-	IOM_AXIS_LY, //unknown
-	IOM_AXIS_RX, //unknown
-	IOM_AXIS_RY, //unknown
-	IOM_AXIS_LUP, //unknown
-	IOM_AXIS_LDOWN, //unknown
-	IOM_AXIS_LLEFT, //unknown
-	IOM_AXIS_LRIGHT, //unknown
-	IOM_AXIS_LUR, //unknown
-	IOM_AXIS_LUL, //unknown
-	IOM_AXIS_LDR, //unknown
-	IOM_AXIS_LDL, //unknown
-	IOM_AXIS_RUP, //unknown
-	IOM_AXIS_RDOWN, //unknown
-	IOM_AXIS_RLEFT, //unknown
-	IOM_AXIS_RRIGHT, //unknown
-	IOM_AXIS_RUR, //unknown
-	IOM_AXIS_RUL, //unknown
-	IOM_AXIS_RDR, //unknown
-	IOM_AXIS_RDL, //unknown
-	IOM_AXIS_DPADX, //unknown
-	IOM_AXIS_DPADY, //unknown
-	IOM_AXIS_LY_UP, //unknown
-	IOM_AXIS_LY_DOWN, //unknown
-	IOM_AXIS_LX_LEFT, //unknown
-	IOM_AXIS_LX_RIGHT, //unknown
-	IOM_AXIS_RY_UP, //unknown
-	IOM_AXIS_RY_DOWN, //unknown
-	IOM_AXIS_RX_LEFT, //unknown
-	IOM_AXIS_RX_RIGHT, //unknown
+	IOMS_PAD_AXIS, // Controller axis input
+	IOM_AXIS_LX, // unknown
+	IOM_AXIS_LY, // unknown
+	IOM_AXIS_RX, // unknown
+	IOM_AXIS_RY, // unknown
+	IOM_AXIS_LUP, // unknown
+	IOM_AXIS_LDOWN, // unknown
+	IOM_AXIS_LLEFT, // unknown
+	IOM_AXIS_LRIGHT, // unknown
+	IOM_AXIS_LUR, // unknown
+	IOM_AXIS_LUL, // unknown
+	IOM_AXIS_LDR, // unknown
+	IOM_AXIS_LDL, // unknown
+	IOM_AXIS_RUP, // unknown
+	IOM_AXIS_RDOWN, // unknown
+	IOM_AXIS_RLEFT, // unknown
+	IOM_AXIS_RRIGHT, // unknown
+	IOM_AXIS_RUR, // unknown
+	IOM_AXIS_RUL, // unknown
+	IOM_AXIS_RDR, // unknown
+	IOM_AXIS_RDL, // unknown
+	IOM_AXIS_DPADX, // unknown
+	IOM_AXIS_DPADY, // unknown
+	IOM_AXIS_LY_UP, // unknown
+	IOM_AXIS_LY_DOWN, // unknown
+	IOM_AXIS_LX_LEFT, // unknown
+	IOM_AXIS_LX_RIGHT, // unknown
+	IOM_AXIS_RY_UP, // unknown
+	IOM_AXIS_RY_DOWN, // unknown
+	IOM_AXIS_RX_LEFT, // unknown
+	IOM_AXIS_RX_RIGHT, // unknown
+	NULL, // hardcoded in keycodes_to_rust.py
 ];

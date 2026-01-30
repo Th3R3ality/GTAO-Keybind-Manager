@@ -1,3 +1,5 @@
+use crate::input::creator::CREATOR_ROTATE_RIGHT;
+
 pub mod cellphone_camera;
 pub mod cellphone_misc;
 pub mod cellphone_move;
@@ -32,6 +34,57 @@ pub mod vehicle_ground_online;
 pub mod vehicle_ground;
 pub mod vehicle_sub;
 
+pub const INPUT_CODES: &'static[&'static[&'static str]] = &[
+    cellphone_camera::ALL,
+    cellphone_misc::ALL,
+    cellphone_move::ALL,
+    cellphone_takeout::ALL,
+    context::ALL,
+    creator_on_foot::ALL,
+    creator::ALL,
+    endscreen::ALL,
+    frontend::ALL,
+    general::ALL,
+    ignore::ALL,
+    multiplayer_chat::ALL,
+    multiplayer_misc::ALL,
+    multiplayer_wheel_consumables::ALL,
+    on_foot_combat::ALL,
+    on_foot_melee::ALL,
+    on_foot_move::ALL,
+    on_foot_shooting::ALL,
+    on_foot_sniper_zoom::ALL,
+    on_foot_sprint::ALL,
+    on_foot_weapon_select::ALL,
+    open_weapon_wheel::ALL,
+    parachute::ALL,
+    pause::ALL,
+    pm_pane_foot::ALL,
+    reserved::ALL,
+    switch_camera::ALL,
+    vehicle_fly_online::ALL,
+    vehicle_fly::ALL,
+    vehicle_general::ALL,
+    vehicle_ground_online::ALL,
+    vehicle_ground::ALL,
+    vehicle_sub::ALL,
+];
+
+pub fn get_index(input_code: &str) -> Option<usize> {
+    for (index, input) in INPUT_CODES.iter().flat_map(|x| x.iter()).enumerate() {
+        if input == &input_code {
+            return Some(index)
+        }
+    }
+    return None
+}
+pub fn from_index(index: usize) -> Option<&'static str> {
+    return INPUT_CODES
+        .iter()
+        .flat_map(|x| x.iter())
+        .copied()
+        .nth(index);
+}
 
 /*
 pub const NEXT_CAMERA: &str = &"INPUT_NEXT_CAMERA";
