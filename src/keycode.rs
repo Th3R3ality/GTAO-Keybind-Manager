@@ -1,9 +1,6 @@
 //pub const NONE: &(&str,&str,&str) = &("KEY_NONE", "None", "Unbound"); i think its null and not this
-pub const NULL: &'static(&'static str,&'static str,&'static str) = &("KEY_NULL", "Null", "Unbound");
-pub const OTHER: &'static [&'static (&'static str, &'static str, &'static str )] = &[
-    &("OTHER", "Other", "Manually created category"),
-    NULL,
-];
+//pub const NULL: &'static(&'static str,&'static str,&'static str) = &("KEY_NULL", "Null", "Unbound");
+// KEY_NULL is appended to every category (it may only work/is used with "keyboard")
 
 pub mod keyboard;
 pub mod mouse_button;
@@ -13,7 +10,6 @@ pub const KEYCODES: &[&[&(&str,&str,&str)]] = &[
     keyboard::ALL,
     mouse_button::ALL,
     mouse_wheel::ALL,
-    OTHER,
 ];
 
 pub fn category_from_index(index: usize) -> Option<&'static (&'static str,&'static str,&'static str)>{

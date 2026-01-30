@@ -2,6 +2,7 @@ use crate::keybind_manager;
 use crate::keybind_manager::State;
 use crate::keybind_manager::Message;
 
+use crate::input;
 use crate::keycode;
 use crate::asset;
 
@@ -77,23 +78,29 @@ fn view(state: &State) -> Element<'_, Message> {
         })
     ;
 
+    let mut background_column: iced::widget::Column<'_, Message> = column![];
+    if let Some(profile) = &state.current_profile {
+        if let Some(keybinds) = &profile.keybinds {
+            background_column = background_column.extend(
+                keybinds.iter().map(|keybind|{
+
+                    match (
+                        input::from_index(keybind.0),
+                        keycode::category_from_index(keybind.1),
+                        keycode::keycode_from_indexes(keybind.1, keybind.2)
+                    ) {
+                        (Some(input), Some(category), Some(keycode))
+                            => text!("{} | {} | {}", input, category.1, keycode.1).into(),
+                        _ => text("Error somehow").into()
+                    }
+                })
+            );
+        }
+    }
+
     let background: Element<Message> = scrollable(
         column![]
-        .extend(
-            keycode::KEYCODES.iter().flat_map(|category|
-                category.iter().enumerate().map(|(i, code)|
-                    if i == 0{
-                        text!("{} - {}", code.1, code.2).size(28).into()
-                    }
-                    else {
-                        row![
-                        container(text(code.1)).style(container::bordered_box).align_x(iced::Left),
-                        container(text(code.2)).style(container::bordered_box).align_x(iced::Right).width(iced::Fill),
-                        ].width(iced::Fill).padding(5).into()
-                    }
-                )
-            )
-        ),
+        .push(background_column)
     )
     .width(iced::Fill)
     .height(iced::Fill)
