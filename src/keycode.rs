@@ -12,13 +12,17 @@ pub const KEYCODES: &[&[&(&str,&str,&str)]] = &[
     mouse_wheel::ALL,
 ];
 
-pub fn category_from_index(index: usize) -> Option<&'static (&'static str,&'static str,&'static str)>{
+pub const KEYCODE_ERR_KEY: &'static (&'static str, &'static str, &'static str) = &(&"???_ERR_KEY",&"??_ERR_KEY",&"???_ERR_KEY");
+pub const KEYCODE_ERR_CATEGORY: &'static (&'static str, &'static str, &'static str) = &(&"???_ERR_CATEGORY",&"??_ERR_CATEGORY",&"???_ERR_CATEGORY");
+
+pub fn category_from_index(index: usize) -> &'static (&'static str,&'static str,&'static str) {
     if let Some(category) = KEYCODES.iter().nth(index) {
         return category.iter()
             .next()
             .copied()
+            .unwrap_or(KEYCODE_ERR_CATEGORY)
     }
-    return None
+    return KEYCODE_ERR_CATEGORY
 }
 pub fn get_category_index(category_name: &str) -> Option<usize> {
     for (category_index, category) in KEYCODES.iter().enumerate() {
@@ -33,14 +37,15 @@ pub fn get_category_index(category_name: &str) -> Option<usize> {
 }
 
 pub fn keycode_from_indexes(category_index: usize, keycode_index: usize)
-        -> Option<&'static(&'static str, &'static str, &'static str)> {
+        -> &'static (&'static str, &'static str, &'static str) {
     if let Some(category) = KEYCODES.iter().nth(category_index) {
         return category.iter()
             .nth(keycode_index)
             .copied()
+            .unwrap_or(KEYCODE_ERR_KEY)
     }
 
-    return None
+    return KEYCODE_ERR_KEY
 }
 
 pub fn get_keycode_index_with_category_index(category_index: usize, keycode_name: &str) -> Option<usize> {

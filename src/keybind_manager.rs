@@ -59,12 +59,15 @@ impl State {
     }
 }
 
-type Keybind = (usize, usize, usize);
+type KeybindId = usize;
+type Keybind = (usize, usize, usize, KeybindId);
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Profile {
     pub name: String,
     pub path: PathBuf,
     pub keybinds: Option<Vec<Keybind>>,
+    pub id_counter: KeybindId,
 }
 
 const USER_HEADER: &str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -76,46 +79,13 @@ const USER_SOURCE: &str = "Source";
 const USER_PARAMS: &str = "Parameters";
 const USER_ITEM: &str = "Item";
 
-fn opening(tag: &str) -> String{
-    format!("<{}>", tag)
-}
-fn closing(tag: &str) -> String{
-    format!("</{}>", tag)
-}
-fn extract_xml_value(enclosed_value: &str, tag: &str) -> Option<String> {
-    let res = enclosed_value
-        .strip_prefix(&opening(tag))?
-        .strip_suffix(&closing(tag));
-
-    match res{
-        Some(res) => Some(res.to_owned()),
-        _ => None,
-    }
-}
-
-fn builder_to_string<T: ToString>(builder: (Option<T>, Option<T>, Option<T>)) -> String {
-    let input_string = match builder.0 {
-        Some(input) => input.to_string(),
-        None => "None".to_owned(),
-    };
-    let category_string = match builder.1 {
-        Some(category) => category.to_string(),
-        None => "None".to_owned(),
-    };
-    let keycode_string = match builder.2 {
-        Some(keycode) => keycode.to_string(),
-        None => "None".to_owned(),
-    };
-
-    return format!("builder: {} {} {}", input_string, category_string, keycode_string)
-}
-
 impl Profile{
     pub fn new(name: String, xml_path: PathBuf) -> Profile{
         Profile{
             name: name,
             path: xml_path,
             keybinds: None,
+            id_counter: 0,
         }
     }
 
@@ -139,26 +109,23 @@ impl Profile{
                 if let Some(keybinds) = &self.keybinds {
 
                     for keybind in keybinds {
-                        match (
+                        let (input, category, keycode) = (
                             input::from_index(keybind.0),
                             keycode::category_from_index(keybind.1),
                             keycode::keycode_from_indexes(keybind.1, keybind.2)
-                        ) {
-                            (Some(input), Some(category), Some(keycode)) => {
-                                let _ = file.write(format!("    {}\n", opening(USER_ITEM)).as_bytes());
-                                let _ = file.write(format!("      {}{}{}\n",
-                                    opening(USER_INPUT), input, closing(USER_INPUT)).as_bytes());
-                                let _ = file.write(format!("      {}{}{}\n",
-                                    opening(USER_SOURCE), category.0, closing(USER_SOURCE)).as_bytes());
-                                let _ = file.write(format!("      {}\n", opening(USER_PARAMS)).as_bytes());       
-                                let _ = file.write(format!("        {}{}{}\n",
-                                    opening(USER_ITEM), keycode.0, closing(USER_ITEM)).as_bytes());
-                                let _ = file.write(format!("      {}\n", closing(USER_PARAMS)).as_bytes());       
-                                
-                                let _ = file.write(format!("    {}\n", closing(USER_ITEM)).as_bytes());       
-                            },
-                            _ => return Err(("While writing xml".to_owned(), "keybind codes incomplete/not found".to_owned())),
-                        }
+                        );
+
+                        let _ = file.write(format!("    {}\n", opening(USER_ITEM)).as_bytes());
+                        let _ = file.write(format!("      {}{}{}\n",
+                            opening(USER_INPUT), input, closing(USER_INPUT)).as_bytes());
+                        let _ = file.write(format!("      {}{}{}\n",
+                            opening(USER_SOURCE), category.0, closing(USER_SOURCE)).as_bytes());
+                        let _ = file.write(format!("      {}\n", opening(USER_PARAMS)).as_bytes());       
+                        let _ = file.write(format!("        {}{}{}\n",
+                            opening(USER_ITEM), keycode.0, closing(USER_ITEM)).as_bytes());
+                        let _ = file.write(format!("      {}\n", closing(USER_PARAMS)).as_bytes());       
+                        
+                        let _ = file.write(format!("    {}\n", closing(USER_ITEM)).as_bytes());       
                     }
                 }
 
@@ -260,7 +227,8 @@ impl Profile{
                 s if s.starts_with(&closing(USER_ITEM)) => {
                     match keybind_builder {
                         (Some(input), Some(category), Some(keycode)) => {
-                            keybind_collector.push((input, category, keycode));
+                            keybind_collector.push((input, category, keycode, self.id_counter));
+                            self.id_counter += 1;
                         },
                         _ => {
                             return Err(("Incomplete Keybind".to_owned(), builder_to_string(keybind_builder_names)))
@@ -281,4 +249,38 @@ impl fmt::Display for Profile{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.name)
     }
+}
+
+fn opening(tag: &str) -> String{
+    format!("<{}>", tag)
+}
+fn closing(tag: &str) -> String{
+    format!("</{}>", tag)
+}
+fn extract_xml_value(enclosed_value: &str, tag: &str) -> Option<String> {
+    let res = enclosed_value
+        .strip_prefix(&opening(tag))?
+        .strip_suffix(&closing(tag));
+
+    match res{
+        Some(res) => Some(res.to_owned()),
+        _ => None,
+    }
+}
+
+fn builder_to_string<T: ToString>(builder: (Option<T>, Option<T>, Option<T>)) -> String {
+    let input_string = match builder.0 {
+        Some(input) => input.to_string(),
+        None => "None".to_owned(),
+    };
+    let category_string = match builder.1 {
+        Some(category) => category.to_string(),
+        None => "None".to_owned(),
+    };
+    let keycode_string = match builder.2 {
+        Some(keycode) => keycode.to_string(),
+        None => "None".to_owned(),
+    };
+
+    return format!("builder: {} {} {}", input_string, category_string, keycode_string)
 }

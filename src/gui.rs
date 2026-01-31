@@ -7,9 +7,12 @@ use crate::keycode;
 use crate::asset;
 
 use iced::Border;
+use iced::Length::FillPortion;
+use iced::padding;
 use iced::widget::container::{
     Style,
 };
+use iced::widget::space;
 use iced::window;
 use iced::{
     Element,
@@ -29,7 +32,7 @@ pub fn run(state: State) -> iced::Result {
             ..Default::default()
         })
         .title(keybind_manager::State::title)
-        .theme(Theme::Dark)
+        .theme(Theme::TokyoNight)
         .antialiasing(true)
         .run()
 }
@@ -65,7 +68,9 @@ fn view(state: &State) -> Element<'_, Message> {
             pick_list(state.available_profiles.clone(), state.current_profile.clone(), keybind_manager::Message::ProfileSelected)
                 .placeholder("none")
                 .text_size(28)
-            ).height(iced::Fill).align_y(iced::Center),
+            )
+            .height(iced::Fill)
+            .align_y(iced::Center),
         ]
     )
     .width(iced::Fill)
@@ -76,7 +81,7 @@ fn view(state: &State) -> Element<'_, Message> {
             border: Border { 
                 width: 2.0, 
                 color: palette.background.weak.color,
-                ..Border::default()
+                radius: 0.into(),
                 },
             ..Style::default()
         }
@@ -90,17 +95,35 @@ fn view(state: &State) -> Element<'_, Message> {
                 (keybind.1, keybind.0)
             );
             background_column = background_column.extend(
-                keybinds_sorted.iter().map(|keybind|{
+                keybinds_sorted.iter().enumerate().map(|(index, keybind)|{
 
-                    match (
-                        input::from_index(keybind.0),
+                    let (input, category, keycode) =
+                        (input::from_index(keybind.0),
                         keycode::category_from_index(keybind.1),
                         keycode::keycode_from_indexes(keybind.1, keybind.2)
-                    ) {
-                        (Some(input), Some(category), Some(keycode))
-                            => text!("{} | {} | {}", input, category.1, keycode.1).into(),
-                        _ => text("Error somehow").into()
-                    }
+                    );
+                    
+                    container(row![
+                        space().width(FillPortion(1)),
+                        container(column![
+                                text(input).size(20),
+                                text!("#{}", keybind.3).size(12).style(text::warning),
+                        ]).width(iced::FillPortion(20))
+                        ,container(column![
+                            text(category.1).size(20),
+                            text(category.2).size(12).style(text::primary),
+                        ]).width(iced::FillPortion(15))
+                        ,container(column![
+                            text(keycode.2).size(20),
+                            text(keycode.1).size(12).style(text::primary),
+                        ]).width(iced::FillPortion(10))
+                        ,
+                    ])
+                    .width(iced::Fill)
+                    .style( if index % 2 == 0 {container::transparent} else {container::dark} )
+                    //.height(iced::Length::Fixed(75.0))
+                    .padding(4)
+                    .into()
                 })
             );
         }
@@ -112,11 +135,9 @@ fn view(state: &State) -> Element<'_, Message> {
     .height(iced::Fill)
     .into();
 
-   
-
     column![
-        container(header).height(iced::FillPortion(1)),
-        container(content).height(iced::FillPortion(9)),
+        container(header).height(iced::FillPortion(9)),
+        container(content).height(iced::FillPortion(90)),
     ]
     .into()
 }

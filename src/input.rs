@@ -32,6 +32,7 @@ pub mod vehicle_ground_online;
 pub mod vehicle_ground;
 pub mod vehicle_sub;
 
+pub const INPUT_ERR_CODE: &'static str = &"???_INPUT_???";
 pub const INPUT_CODES: &'static[&'static[&'static str]] = &[
     cellphone_camera::ALL,
     cellphone_misc::ALL,
@@ -77,10 +78,11 @@ pub fn get_index(input_code: &str) -> Option<usize> {
             _ => None,
         }
 }
-pub fn from_index(index: usize) -> Option<&'static str> {
+pub fn from_index(index: usize) -> &'static str {
     return INPUT_CODES
         .iter()
         .flat_map(|x| x.iter())
         .copied()
-        .nth(index);
+        .nth(index)
+        .unwrap_or(INPUT_ERR_CODE);
 }
