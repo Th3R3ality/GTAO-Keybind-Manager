@@ -70,9 +70,6 @@ def number_check(stripped_keycode):
     return the_numbers[num]
 """ 
 
-def capitalize_first(word):
-    return word[0].upper() + word[1:]
-
 def santize_desc(desc):
     return desc.replace("\\","\\\\").replace("\"", "\\\"")
 
@@ -110,7 +107,9 @@ def main():
                 code = data[1]
                 desc = data[2]
 
-                pretty = ' '.join(map(capitalize_first, stripped.lower().split('_')))
+                pretty = ' '.join(map(lambda elems : elems[0].upper() + elems[1:], stripped.lower().split('_')))
+                
+
 
                 file.write(f"pub const {code}: &'static(&'static str, &'static str, &'static str) = &(\"{code}\", \"{pretty}\", \"{desc}\");\n")
             file.write("pub const NULL: &'static(&'static str, &'static str, &'static str) = &(\"KEY_NULL\", \"NULL\", \"Unbound\"); // hardcoded in keycodes_to_rust.py\n")
