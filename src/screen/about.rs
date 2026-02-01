@@ -22,6 +22,9 @@ pub struct Message {
 }
 
 impl Screen {
+    pub fn new() -> Self {
+        Self {}
+    }
     pub fn update(_state: &State, _message: &Message) {
 
     }

@@ -1,17 +1,18 @@
 use iced::{
     Border,
-    window,
     Element,
     Task,
     Theme,
+    window,
     widget::{
-        pick_list,
         column,
+        container,
+        pick_list,        
         row,
+        button,
         scrollable,
         text,
-        container,
-    }
+    },
 };
 
 use crate::{
@@ -35,6 +36,7 @@ pub fn run(state: State) -> iced::Result {
         .title(State::title)
         .theme(Theme::TokyoNight)
         .antialiasing(true)
+        .font(asset::ICON_FONT_DATA)
         .run()
 }
 
@@ -63,7 +65,8 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
 }
 
 fn view(state: &State) -> Element<'_, Message> {
-    let header = container(
+    let header = container(row![
+    container(
         row![
             text("Profile: ")
                 .size(28)
@@ -78,7 +81,14 @@ fn view(state: &State) -> Element<'_, Message> {
             .height(iced::Fill)
             .align_y(iced::Center),
         ]
-    )
+    ).align_left(iced::Fill),
+    container(
+        button(
+            text!("{}", "\u{e8fd}").size(40).font(asset::ICON_FONT).center()
+        ).on_press(Message::ScreenSelected(Screen::About(about::Screen::new())))
+    ).align_right(iced::Fill),
+
+    ])
     .width(iced::Fill)
     .padding(10)
     .style(|theme: &Theme| {
