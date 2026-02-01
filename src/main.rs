@@ -4,6 +4,7 @@ pub mod keycode;
 pub mod input;
 pub mod screen;
 pub mod asset;
+pub mod profile;
 
 use rfd::FileDialog;
 
