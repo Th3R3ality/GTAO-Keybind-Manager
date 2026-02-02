@@ -8,7 +8,7 @@ use std::io::{
 use crate::{
     screen::{
         Screen,
-        keybinding,
+        keybindings,
         about,
     },
     profile::Profile,
@@ -25,10 +25,9 @@ pub struct State {
 }
 #[derive(Debug, Clone)]
 pub enum Message {
-    ProfileSelected(Profile),
     ScreenSelected(Screen),
-    KeybindingMessage(keybinding::Message),
-    AboutMessage(about::Message),
+    Keybindings(keybindings::Message),
+    About(about::Message),
 }
 
 impl State {
@@ -36,7 +35,7 @@ impl State {
         let mut new: State = State{
             available_profiles: Vec::new(),
             current_profile: None,
-            screen: Screen::Keybinding(keybinding::Screen::new()),
+            screen: Screen::Landing,
         };
 
         let _ = new.discover_profiles(profiles_folder);

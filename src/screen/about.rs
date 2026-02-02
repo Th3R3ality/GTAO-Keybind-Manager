@@ -1,6 +1,7 @@
 use iced::{
     Element,
     widget::{
+        space,
         container,
         column,
         text,
@@ -12,8 +13,8 @@ use crate::keybind_manager::{
         VERSION,
     };
 
-#[derive(Debug, Clone)]
-pub struct Screen {
+#[derive(Debug, Clone, PartialEq)]
+pub struct About {
 
 }
 #[derive(Debug, Clone)]
@@ -21,21 +22,21 @@ pub struct Message {
 
 }
 
-impl Screen {
+impl About {
     pub fn new() -> Self {
         Self {}
     }
     pub fn update(_state: &State, _message: &Message) {
 
     }
-    pub fn view(&self, _state: &State) -> Element<'_, Message> {
-        container(column![
+    pub fn view(&self, _state: &State) -> (Element<'_, Message>,Element<'_, Message>) {
+        (container(column![
             text!("Version {}", VERSION),
         ])
         .width(iced::Fill)
         .height(iced::Fill)
-        .into()
-
-
+        .into(),
+        space().into()
+        )
     }
 }

@@ -4,30 +4,35 @@ use iced::{
     Task,
     Theme,
     window,
+    Length,
     widget::{
         column,
         container,
         pick_list,        
         row,
         button,
-        scrollable,
+        space,
         text,
     },
 };
 
 use crate::{
-    asset,
+    asset::{self, Icon},
     keybind_manager::{
         Message,
         State
     },
     screen::{
-        Screen, about, keybinding
-    }
+        About, Keybindings, Screen
+    },
 };
 
+const HEADER_PADDING: f32 = 10.0;
+const HEADER_BORDER_WIDTH: f32 = 0.0;
+const HEADER_HEIGHT: f32 = 75.0;
+
 pub fn run(state: State) -> iced::Result {
-    let le_icon = window::icon::from_file_data(asset::ICON32, None).unwrap();
+    let le_icon = window::icon::from_file_data(asset::ICON64, None).unwrap();
     iced::application( move || (state.clone(), iced::Task::none()), update, view)
         .window(window::Settings {
             icon: Some(le_icon),
@@ -42,78 +47,72 @@ pub fn run(state: State) -> iced::Result {
 
 fn update(state: &mut State, message: Message) -> Task<Message> {
     match message {
-        Message::ProfileSelected(mut profile) => {
-            let res = profile.load_xml().err();
-            match res {
-                Some(err) => println!("Error: {} | {}", err.0, err.1),
-                None => {
-                    if let Err(err) = profile.write_xml(){
-                        println!("Error writing xml '{}': {} | {}", profile.name, err.0, err.1);
-                    }
-                    state.current_profile = Some(profile);
-                },
-            }
-        },
         Message::ScreenSelected(screen) => {
             state.screen = screen;
         },
-        Message::KeybindingMessage(message) => keybinding::Screen::update(state, &message),
-        Message::AboutMessage(message) => about::Screen::update(state, &message),
+        Message::Keybindings(message) => Keybindings::update(state, &message),
+        Message::About(message) => About::update(state, &message),
     }
 
     Task::none()
 }
 
 fn view(state: &State) -> Element<'_, Message> {
-    let header = container(row![
-    container(
-        row![
-            text("Profile: ")
-                .size(28)
-                .align_y(iced::alignment::Vertical::Center)
-                .align_x(iced::alignment::Horizontal::Center)
-                .width(iced::Shrink).height(iced::Fill),
-            container(
-            pick_list(state.available_profiles.clone(), state.current_profile.clone(), Message::ProfileSelected)
-                .placeholder("none")
-                .text_size(28)
-            )
-            .height(iced::Fill)
-            .align_y(iced::Center),
-        ]
-    ).align_left(iced::Fill),
-    container(
-        button(
-            text!("{}", "\u{e8fd}").size(40).font(asset::ICON_FONT).center()
-        ).on_press(Message::ScreenSelected(Screen::About(about::Screen::new())))
-    ).align_right(iced::Fill),
+    let header_navigation = container(row![
+        container(
+            button(
+                text!("{}", Icon::Keyboard).size(40).font(asset::ICON_FONT).center()
+            ).style(button::background)
+            .on_press(Message::ScreenSelected(Screen::Keybindings(Keybindings::new())))
+        ).align_right(iced::Fill),
+        space().width(Length::Fixed(HEADER_PADDING)),
+        container(
+            button(
+                text!("{}", Icon::Help).size(40).font(asset::ICON_FONT).center()
+            ).style(button::background)
+            .on_press(Message::ScreenSelected(Screen::About(About::new())))
+        ),
+    ]).align_right(Length::Shrink);
+    
+    let (content, screen_header) = match &state.screen {
 
+        Screen::Keybindings(screen) => {
+            let (a, b) = screen.view(&state);
+            (a.map(Message::Keybindings), b.map(Message::Keybindings))
+        },
+        Screen::About(screen) => {
+            let (a, b) = screen.view(&state);
+            (a.map(Message::About), b.map(Message::About))
+        },
+        Screen::Landing => {(
+            container(text("Welcome!").size(48).center().style(text::base)).center(iced::Fill).into(),
+            space().into()
+        )},
+    };
+
+    let header = container(row![
+        container(screen_header).width(Length::Fill).height(Length::Fill),
+        header_navigation,
     ])
+    .height(Length::Fixed(HEADER_HEIGHT))
     .width(iced::Fill)
-    .padding(10)
+    .padding(HEADER_PADDING)
     .style(|theme: &Theme| {
         let palette = theme.extended_palette();
         container::Style {
             border: Border { 
-                width: 2.0, 
+                width: HEADER_BORDER_WIDTH, 
                 color: palette.background.weak.color,
                 radius: 0.into(),
                 },
             ..container::Style::default()
         }
     });
-    
-    let content: Element<Message> = scrollable( match &state.screen {
-        Screen::Keybinding(screen) => screen.view(&state).map(Message::KeybindingMessage),
-        Screen::About(screen) => screen.view(&state).map(Message::AboutMessage),
-    })
-    .width(iced::Fill)
-    .height(iced::Fill)
-    .into();
 
     column![
-        container(header).height(iced::FillPortion(9)),
-        container(content).height(iced::FillPortion(90)),
+        header,
+        space().height(Length::Fixed(1.0)).width(Length::Fill),
+        container(content).width(Length::Fill).height(Length::Fill),
     ]
     .into()
 }

@@ -1,10 +1,13 @@
-pub mod keybinding;
+pub mod keybindings;
 pub mod about;
 
+pub use keybindings::Keybindings;
+pub use about::About;
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Screen {
-    Keybinding(keybinding::Screen),
-    About(about::Screen),
+    Landing,
+    Keybindings(Keybindings),
+    About(About),
 }
