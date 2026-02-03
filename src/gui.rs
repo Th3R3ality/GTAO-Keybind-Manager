@@ -8,7 +8,6 @@ use iced::{
     widget::{
         column,
         container,
-        pick_list,        
         row,
         button,
         space,
@@ -27,9 +26,9 @@ use crate::{
     },
 };
 
-const HEADER_PADDING: f32 = 10.0;
-const HEADER_BORDER_WIDTH: f32 = 0.0;
-const HEADER_HEIGHT: f32 = 75.0;
+pub const HEADER_PADDING: f32 = 10.0;
+pub const HEADER_BORDER_WIDTH: f32 = 0.0;
+pub const HEADER_HEIGHT: f32 = 75.0;
 
 pub fn run(state: State) -> iced::Result {
     let le_icon = window::icon::from_file_data(asset::ICON64, None).unwrap();
@@ -48,7 +47,12 @@ pub fn run(state: State) -> iced::Result {
 fn update(state: &mut State, message: Message) -> Task<Message> {
     match message {
         Message::ScreenSelected(screen) => {
-            state.screen = screen;
+            if screen == state.screen {
+                state.screen = Screen::Landing;
+            }
+            else {
+                state.screen = screen;
+            }
         },
         Message::Keybindings(message) => Keybindings::update(state, &message),
         Message::About(message) => About::update(state, &message),
@@ -59,19 +63,9 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
 
 fn view(state: &State) -> Element<'_, Message> {
     let header_navigation = container(row![
-        container(
-            button(
-                text!("{}", Icon::Keyboard).size(40).font(asset::ICON_FONT).center()
-            ).style(button::background)
-            .on_press(Message::ScreenSelected(Screen::Keybindings(Keybindings::new())))
-        ).align_right(iced::Fill),
+        navigation_button(state, Icon::Keyboard, Screen::Keybindings(Keybindings::new())),
         space().width(Length::Fixed(HEADER_PADDING)),
-        container(
-            button(
-                text!("{}", Icon::Help).size(40).font(asset::ICON_FONT).center()
-            ).style(button::background)
-            .on_press(Message::ScreenSelected(Screen::About(About::new())))
-        ),
+        navigation_button(state, Icon::Help, Screen::About(About::new())),
     ]).align_right(Length::Shrink);
     
     let (content, screen_header) = match &state.screen {
@@ -85,7 +79,10 @@ fn view(state: &State) -> Element<'_, Message> {
             (a.map(Message::About), b.map(Message::About))
         },
         Screen::Landing => {(
-            container(text("Welcome!").size(48).center().style(text::base)).center(iced::Fill).into(),
+            column![
+                container(text("Welcome!").size(48).center().style(text::base)).center(iced::Fill),
+                container(space()).align_bottom(Length::Fixed(HEADER_HEIGHT)), // to make the text centered correctly
+            ].into(),
             space().into()
         )},
     };
@@ -111,8 +108,16 @@ fn view(state: &State) -> Element<'_, Message> {
 
     column![
         header,
-        space().height(Length::Fixed(1.0)).width(Length::Fill),
         container(content).width(Length::Fill).height(Length::Fill),
     ]
     .into()
+}
+
+fn navigation_button(state: &State, icon: Icon, screen: Screen) -> Element<'static, Message> {
+    container(
+            button(
+                text!("{}", icon).size(40).font(asset::ICON_FONT).center()
+            ).style( if state.screen == screen { button::primary } else { button::background } )
+            .on_press(Message::ScreenSelected(screen))
+    ).into()
 }

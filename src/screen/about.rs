@@ -1,17 +1,13 @@
 use iced::{
-    Element,
-    widget::{
-        space,
-        container,
-        column,
-        text,
-    },
+    Element, Length, widget::{
+        column, container, space, text
+    }
 };
 
-use crate::keybind_manager::{
+use crate::{gui, keybind_manager::{
         State,
         VERSION,
-    };
+    }};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct About {
@@ -30,12 +26,15 @@ impl About {
 
     }
     pub fn view(&self, _state: &State) -> (Element<'_, Message>,Element<'_, Message>) {
-        (container(column![
-            text!("Version {}", VERSION),
-        ])
-        .width(iced::Fill)
-        .height(iced::Fill)
-        .into(),
+        (column![
+            container(column![
+                text!("Tool developed by Reality"),
+                text!("Version {}", VERSION).size(28),
+            ])
+            .center(Length::Fill)
+            .padding(20),
+            container(space()).align_bottom(Length::Fixed(gui::HEADER_HEIGHT)), 
+        ].into(),
         space().into()
         )
     }
