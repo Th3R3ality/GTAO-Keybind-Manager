@@ -1,5 +1,5 @@
 use std::fmt;
-use iced::Font;
+use iced::{Font, widget::{Text, text}};
 
 pub const ICON32: &[u8] = include_bytes!("../assets/32x.png");
 pub const ICON64: &[u8] = include_bytes!("../assets/64x.png");
@@ -14,6 +14,10 @@ pub const ICON_FONT: Font = Font::with_name("Material Icons");
 pub enum Icon {
     Help = '\u{e8fd}' as u32,
     Keyboard = '\u{f028}' as u32,
+    Add = '\u{e145}' as u32,
+    AddCircle = '\u{e148}' as u32,
+    AddBox = '\u{e146}' as u32,
+    Cancel = '\u{e5c9}' as u32,
 }
 impl Icon {
     pub fn as_char(self) -> char {
@@ -24,4 +28,8 @@ impl fmt::Display for Icon {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_char())
     }
+}
+pub fn icon(icon: Icon) -> Text<'static> {
+    text!("{}", icon).font(ICON_FONT)
+    
 }

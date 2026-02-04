@@ -11,17 +11,21 @@ use crate::{
         keybindings,
         about,
     },
-    profile::Profile,
+    profile::{
+        ProfileRef,
+        Profile,
+    },
 };
 
 
-pub const VERSION: &str = &"0.1";
+pub const VERSION: &str = &"0.0";
 
 #[derive(Debug, Clone)]
 pub struct State {
-    pub available_profiles: Vec<Profile>,
-    pub current_profile: Option<Profile>,
+    pub available_profiles: Vec<ProfileRef>,
+    pub selected_profile: Option<ProfileRef>,
     pub screen: Screen,
+    pub search_string: String,
 }
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -34,8 +38,9 @@ impl State {
     pub fn new(profiles_folder: &PathBuf) -> State {
         let mut new: State = State{
             available_profiles: Vec::new(),
-            current_profile: None,
+            selected_profile: None,
             screen: Screen::Landing,
+            search_string: "".to_owned(),
         };
 
         let _ = new.discover_profiles(profiles_folder);
@@ -43,12 +48,13 @@ impl State {
         return new
     }
     pub fn title(&self) -> String {
-        let suffix = self
-            .current_profile
-            .as_ref()
-            .map(|p| format!(" | Current Profile: {}", p.name))
-            .unwrap_or_default();
-        format!("GTAO Keybind Manager {} by Reality{}", VERSION, suffix)
+
+        match self.selected_profile.as_ref() {
+            None => format!("GTAO Keybind Manager {} by Reality", VERSION).to_owned(),
+            Some(profile_ref) => {
+                format!("GTAO Keybind Manager {} by Reality | Profile: {}", VERSION, profile_ref.borrow().name).to_owned()
+            },
+        }
     }
     fn discover_profiles(&mut self, profiles_folder: &PathBuf) -> std::io::Result<()>{
         for entry in fs::read_dir(profiles_folder)? {

@@ -1,17 +1,10 @@
 use std::{
-    path::{
-        PathBuf,
-    },
-    fs::{
+    cell::RefCell, fmt::{
+        self,
+    }, fs::{
         self,
         OpenOptions,
-    },
-    fmt::{
-        self,
-    },
-    io::{
-        Write,
-    }
+    }, io::Write, path::PathBuf, rc::Rc
 };
 
 use crate::{
@@ -19,8 +12,8 @@ use crate::{
     keycode,
 };
 
-type KeybindId = usize;
-type Keybind = (usize, usize, usize, KeybindId);
+pub type KeybindId = usize;
+pub type Keybind = (usize, usize, usize, KeybindId);
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Profile {
@@ -29,6 +22,8 @@ pub struct Profile {
     pub keybinds: Option<Vec<Keybind>>,
     pub id_counter: KeybindId,
 }
+
+pub type ProfileRef = Rc<RefCell<Profile>>;
 
 const USER_HEADER: &str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 const USER_WRAPPER: &str = "rage__ControlInput__ControlSettings";
@@ -40,13 +35,13 @@ const USER_PARAMS: &str = "Parameters";
 const USER_ITEM: &str = "Item";
 
 impl Profile{
-    pub fn new(name: String, xml_path: PathBuf) -> Profile{
-        Profile{
+    pub fn new(name: String, xml_path: PathBuf) -> ProfileRef {
+        Rc::new(RefCell::new(Profile{
             name: name,
             path: xml_path,
             keybinds: None,
             id_counter: 0,
-        }
+        }))
     }
 
     pub fn write_xml(&self) -> std::result::Result<(), (String, String)> {
@@ -204,6 +199,7 @@ impl Profile{
         Ok(())
     }
 }
+
 
 impl fmt::Display for Profile{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
