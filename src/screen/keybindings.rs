@@ -1,7 +1,10 @@
 use iced::{
+    Background,
     Element,
     Length,
+    color,
     widget::{
+        combo_box,
         button,
         column,
         container,
@@ -9,29 +12,44 @@ use iced::{
         row,
         scrollable,
         space,
-        text::LineHeight,
         text,
+        text::{ 
+            LineHeight,
+        },
         text_input,
     }
 };
 
-use crate::asset::{
-    Icon,
-    icon,
+use crate::{
+    keycode,
+    input,
+    styling,
+    asset::{
+        Icon,
+        icon,
+    },
+    keybind_manager::{
+        self,
+        State,
+    },
+    profile::{
+        KeybindId,
+        KeybindInput,
+        KeybindSource,
+        KeybindKeycode,
+    },
+    gui::{
+        Prompt,
+    },
+    screen::{
+        Screen,
+    },
 };
-use crate::keycode;
-use crate::input;
-use crate::keybind_manager::{
-    State,
-};
-use crate::profile::{
-    KeybindId,
-};
-use crate::screen::Screen;
 
 const TOOLBAR_HEIGHT: f32 = 40.0;
 const TOOLBAR_ICON_SIZE: f32 = 28.0;
 
+const KEYBIND_ROW_PADDING: f32 = 4.0;
 const KEYBIND_HEIGHT: f32 = 50.0;
 const KEYBIND_ICON_SIZE: f32 = 36.0;
 
@@ -39,7 +57,10 @@ const KEYBIND_ICON_SIZE: f32 = 36.0;
 pub enum Message {
     ProfileSelected(String),
     Search(String),
-    NewKeybind,
+    BeginNewKeybind,
+    ModifyNewKeybind(Option<KeybindInput>, Option<KeybindSource>, Option<KeybindKeycode>),
+    EndNewKeybind,
+    CancelNewKeybind,
     DeleteKeybind(KeybindId)
 }
 #[derive(Debug, Clone, PartialEq)]
@@ -55,6 +76,9 @@ impl Keybindings {
     pub fn update(state: &mut State, message: &Message) {
         match message {
             Message::ProfileSelected(name) => {
+
+                // TODO: add unsaved changes prompt
+
                 let Some(profile_ref) = state
                     .available_profiles
                     .iter()
@@ -81,15 +105,35 @@ impl Keybindings {
                 state.search_string = string.clone();
                 println!("Search: {}", string)
             }
-            Message::NewKeybind => {
-                println!("new keybind!")
+            Message::BeginNewKeybind => {
+                state.prompt = Some(Prompt::NewKeybind(Self::view_new_keybind));
             },
-            Message::DeleteKeybind(id) => {
-                let Some(profile_ref) = state.selected_profile.clone() else { return };
-                let mut profile = profile_ref.borrow_mut();
-                if let Some(keybinds) = &mut profile.keybinds {
-                    keybinds.retain(|keybind| keybind.3 != *id);
+            Message::ModifyNewKeybind(input, source, keycode) => {
+                if let Some(input) = input {
+                    state.dummy_new_keybind.0 = input.clone();
                 }
+                if let Some(source) = source {
+                    state.dummy_new_keybind.1 = source.clone();
+                }
+                if let Some(keycode) = keycode {
+                    state.dummy_new_keybind.2 = keycode.clone();
+                }
+            }
+            Message::EndNewKeybind => {
+                state.prompt = None;
+                state.selected_profile.as_ref().map(|profile_ref| {
+                    let mut profile = profile_ref.borrow_mut();
+                    state.dummy_new_keybind.3 = profile.new_id();
+                    profile.add_keybind(state.dummy_new_keybind);
+                });
+            }
+            Message::CancelNewKeybind => {
+                state.prompt = None;
+            }
+            Message::DeleteKeybind(id) => {
+                state.selected_profile.as_ref().map(|profile_ref| {
+                    profile_ref.borrow_mut().remove_keybind(*id);
+                });
             },
         }
     }
@@ -105,6 +149,9 @@ impl Keybindings {
             .as_ref()
             .map(|p| p.borrow().name.clone());
 
+        // TODO: make profile name italic when modified flag is set
+        // TODO: add save button when modified flag is set
+        // or activate/deactive save button depending on modified flag
         let header: Element<'_, Message> = container(
         row![
             text("Profile: ")
@@ -129,11 +176,18 @@ impl Keybindings {
         let Some(profile_ref) = &state.selected_profile else {
             return (container(text("No Profile Selected").center()).center(Length::Fill).into(), header)
         };
-        let profile = profile_ref.borrow();
         
-        let Some(keybinds) = &profile.keybinds else { 
-            return (text("no keybind data").size(48).style(text::warning).into(), header)
-        };
+        let profile = profile_ref.borrow();
+        let keybinds = &profile.keybinds;
+        if profile.keybinds.len() <= 0 {
+            return (
+                container(
+                    text("no keybind data").center().size(48).style(text::warning)
+                ).center(Length::Fill).into(), 
+                header
+            )
+        }
+
 
         let mut keybinds_sorted = keybinds.clone();
         keybinds_sorted.sort_by_key(|keybind|
@@ -178,7 +232,7 @@ impl Keybindings {
                             icon(Icon::Cancel).size(KEYBIND_ICON_SIZE).center().style(text::danger)
                         )
                         .on_press(Message::DeleteKeybind(keybind.3))
-                        .style(button::background)
+                        .style(styling::button_transparent)
                     )
                     .align_right(Length::Fixed(KEYBIND_HEIGHT)),
                     space().width(10),
@@ -186,7 +240,7 @@ impl Keybindings {
                 .height(KEYBIND_HEIGHT)
                 .width(iced::Fill)
                 .style( if index % 2 == 1 {container::transparent} else {container::dark} )
-                .padding(4)
+                .padding(KEYBIND_ROW_PADDING)
                 .into()
             })
         );
@@ -199,7 +253,7 @@ impl Keybindings {
                 .size(24),
                 container( button(
                     icon(Icon::Add).size(TOOLBAR_ICON_SIZE).center(),
-                ).on_press(Message::NewKeybind).style(button::success))
+                ).on_press(Message::BeginNewKeybind).style(button::success))
                 .height(Length::Fill)
                 .width(Length::Shrink)
                 .style(container::bordered_box),
@@ -208,12 +262,35 @@ impl Keybindings {
         .align_right(Length::Fill)
         .height(Length::Fixed(TOOLBAR_HEIGHT));
         
-        return (
+    return (
             column!(
                 toolbar,
                 scrollable(keybind_list)
             ).into(),
             header
         )
+    }
+
+    pub fn view_new_keybind(_state: &State) -> Element<'static, keybind_manager::Message> {
+
+
+        let content: Element<'_, Message> = container(container(column![
+        row![
+            // TODO: make these combo boxes (on change send Message::ModifyNewKeybind)
+            text("input"),
+            text("source"),
+            text("key"),
+        ].padding(KEYBIND_ROW_PADDING),
+        row![
+            button(icon(Icon::AddCircle).style(text::success).size(KEYBIND_ICON_SIZE))
+                .on_press(Message::EndNewKeybind)
+                .style(styling::button_transparent),
+            button(icon(Icon::Cancel).style(text::danger).size(KEYBIND_ICON_SIZE))
+                .on_press(Message::CancelNewKeybind)
+                .style(styling::button_transparent),
+        ].padding(KEYBIND_ROW_PADDING)
+        ]).style(container::bordered_box)).center(Length::Fill).style(|_|container::background(Background::Color(color!(0,0,0,0.5))))
+        .into();
+        content.map(keybind_manager::Message::Keybindings)
     }
 }

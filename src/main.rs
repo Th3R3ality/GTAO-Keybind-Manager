@@ -5,6 +5,7 @@ pub mod input;
 pub mod screen;
 pub mod asset;
 pub mod profile;
+pub mod styling;
 
 use rfd::FileDialog;
 

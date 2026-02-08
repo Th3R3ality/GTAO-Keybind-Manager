@@ -5,6 +5,7 @@ use std::io::{
     ErrorKind
 };
 
+use crate::profile::Keybind;
 use crate::{
     screen::{
         Screen,
@@ -15,18 +16,26 @@ use crate::{
         ProfileRef,
         Profile,
     },
+    gui::{
+        Prompt,
+    },
 };
-
 
 pub const VERSION: &str = &"0.0";
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct State {
+    //universal
+    pub screen: Screen,
+    pub prompt: Option<Prompt>,
+
+    // keybindings screen
     pub available_profiles: Vec<ProfileRef>,
     pub selected_profile: Option<ProfileRef>,
-    pub screen: Screen,
     pub search_string: String,
+    pub dummy_new_keybind: Keybind,
 }
+
 #[derive(Debug, Clone)]
 pub enum Message {
     ScreenSelected(Screen),
@@ -37,10 +46,7 @@ pub enum Message {
 impl State {
     pub fn new(profiles_folder: &PathBuf) -> State {
         let mut new: State = State{
-            available_profiles: Vec::new(),
-            selected_profile: None,
-            screen: Screen::Landing,
-            search_string: "".to_owned(),
+            ..Default::default()
         };
 
         let _ = new.discover_profiles(profiles_folder);

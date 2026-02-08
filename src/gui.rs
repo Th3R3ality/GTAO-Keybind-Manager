@@ -6,6 +6,8 @@ use iced::{
     window,
     Length,
     widget::{
+        opaque,
+        stack,
         column,
         container,
         row,
@@ -29,6 +31,14 @@ use crate::{
 pub const HEADER_PADDING: f32 = 10.0;
 pub const HEADER_BORDER_WIDTH: f32 = 0.0;
 pub const HEADER_HEIGHT: f32 = 75.0;
+
+pub const NAVIGATION_ICON_SIZE: f32 = 40.0;
+
+#[derive(Debug, Clone)]
+pub enum Prompt{
+    UnsavedChanges(fn(&State) -> Element<'static, Message>),
+    NewKeybind( fn(&State) -> Element<'static, Message>),
+}
 
 pub fn run(state: State) -> iced::Result {
     let le_icon = window::icon::from_file_data(asset::ICON64, None).unwrap();
@@ -106,9 +116,20 @@ fn view(state: &State) -> Element<'_, Message> {
         }
     });
 
-    column![
-        header,
-        container(content).width(Length::Fill).height(Length::Fill),
+    
+    let prompt = container(opaque(
+        match state.prompt {
+            Some(Prompt::NewKeybind(fun)) => fun(state),
+            Some(Prompt::UnsavedChanges(fun)) => fun(state),
+            None => space().into(),
+        }
+    )).center(Length::Fill);
+    stack![
+        column![
+            header,
+            container(content).width(Length::Fill).height(Length::Fill),
+        ],
+        prompt,
     ]
     .into()
 }
@@ -116,7 +137,7 @@ fn view(state: &State) -> Element<'_, Message> {
 fn navigation_button(state: &State, icon: Icon, screen: Screen) -> Element<'static, Message> {
     container(
             button(
-                text!("{}", icon).size(40).font(asset::ICON_FONT).center()
+                asset::icon(icon).size(NAVIGATION_ICON_SIZE).center()
             ).style( if state.screen == screen { button::primary } else { button::background } )
             .on_press(Message::ScreenSelected(screen))
     ).into()

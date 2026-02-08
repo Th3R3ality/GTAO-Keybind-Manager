@@ -12,15 +12,18 @@ use crate::{
     keycode,
 };
 
+pub type KeybindInput = usize;
+pub type KeybindSource = usize;
+pub type KeybindKeycode = usize;
 pub type KeybindId = usize;
-pub type Keybind = (usize, usize, usize, KeybindId);
-
-#[derive(Debug, Clone, PartialEq)]
+pub type Keybind = (KeybindInput, KeybindSource, KeybindKeycode, KeybindId);
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Profile {
     pub name: String,
     pub path: PathBuf,
-    pub keybinds: Option<Vec<Keybind>>,
+    pub keybinds: Vec<Keybind>,
     pub id_counter: KeybindId,
+    pub modified: bool,
 }
 
 pub type ProfileRef = Rc<RefCell<Profile>>;
@@ -39,9 +42,18 @@ impl Profile{
         Rc::new(RefCell::new(Profile{
             name: name,
             path: xml_path,
-            keybinds: None,
-            id_counter: 0,
+            ..Default::default()
         }))
+    }
+
+    pub fn add_keybind(&mut self, keybind: Keybind) {
+        self.keybinds.push(keybind);
+        self.modified = true;
+    }
+
+    pub fn remove_keybind(&mut self, id: KeybindId) {
+        self.keybinds.retain(|keybind| keybind.3 != id);
+        self.modified = true;
     }
 
     pub fn write_xml(&self) -> std::result::Result<(), (String, String)> {
@@ -61,27 +73,25 @@ impl Profile{
                 let _ = file.write(format!("{}\n", opening(USER_WRAPPER)).as_bytes());
                 let _ = file.write(format!("  {}\n", opening(USER_MAPPINGS)).as_bytes());
 
-                if let Some(keybinds) = &self.keybinds {
 
-                    for keybind in keybinds {
-                        let (input, category, keycode) = (
-                            input::from_index(keybind.0),
-                            keycode::category_from_index(keybind.1),
-                            keycode::keycode_from_indexes(keybind.1, keybind.2)
-                        );
+                for keybind in &self.keybinds {
+                    let (input, category, keycode) = (
+                        input::from_index(keybind.0),
+                        keycode::category_from_index(keybind.1),
+                        keycode::keycode_from_indexes(keybind.1, keybind.2)
+                    );
 
-                        let _ = file.write(format!("    {}\n", opening(USER_ITEM)).as_bytes());
-                        let _ = file.write(format!("      {}{}{}\n",
-                            opening(USER_INPUT), input, closing(USER_INPUT)).as_bytes());
-                        let _ = file.write(format!("      {}{}{}\n",
-                            opening(USER_SOURCE), category.0, closing(USER_SOURCE)).as_bytes());
-                        let _ = file.write(format!("      {}\n", opening(USER_PARAMS)).as_bytes());       
-                        let _ = file.write(format!("        {}{}{}\n",
-                            opening(USER_ITEM), keycode.0, closing(USER_ITEM)).as_bytes());
-                        let _ = file.write(format!("      {}\n", closing(USER_PARAMS)).as_bytes());       
-                        
-                        let _ = file.write(format!("    {}\n", closing(USER_ITEM)).as_bytes());       
-                    }
+                    let _ = file.write(format!("    {}\n", opening(USER_ITEM)).as_bytes());
+                    let _ = file.write(format!("      {}{}{}\n",
+                        opening(USER_INPUT), input, closing(USER_INPUT)).as_bytes());
+                    let _ = file.write(format!("      {}{}{}\n",
+                        opening(USER_SOURCE), category.0, closing(USER_SOURCE)).as_bytes());
+                    let _ = file.write(format!("      {}\n", opening(USER_PARAMS)).as_bytes());       
+                    let _ = file.write(format!("        {}{}{}\n",
+                        opening(USER_ITEM), keycode.0, closing(USER_ITEM)).as_bytes());
+                    let _ = file.write(format!("      {}\n", closing(USER_PARAMS)).as_bytes());       
+                    
+                    let _ = file.write(format!("    {}\n", closing(USER_ITEM)).as_bytes());       
                 }
 
 
@@ -182,8 +192,7 @@ impl Profile{
                 s if s.starts_with(&closing(USER_ITEM)) => {
                     match keybind_builder {
                         (Some(input), Some(category), Some(keycode)) => {
-                            keybind_collector.push((input, category, keycode, self.id_counter));
-                            self.id_counter += 1;
+                            keybind_collector.push((input, category, keycode, self.new_id()));
                         },
                         _ => {
                             return Err(("Incomplete Keybind".to_owned(), builder_to_string(keybind_builder_names)))
@@ -195,8 +204,13 @@ impl Profile{
             }
         }
 
-        self.keybinds = Some(keybind_collector);
+        self.keybinds = keybind_collector;
         Ok(())
+    }
+
+    pub fn new_id(&mut self) -> KeybindId {
+        self.id_counter += 1;
+        self.id_counter
     }
 }
 
