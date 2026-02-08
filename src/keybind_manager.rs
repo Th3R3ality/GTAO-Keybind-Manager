@@ -5,14 +5,18 @@ use std::io::{
     ErrorKind
 };
 
-use crate::profile::Keybind;
+use iced::widget::combo_box;
+
 use crate::{
+    input,
+    keycode,
     screen::{
         Screen,
         keybindings,
         about,
     },
     profile::{
+        Keybind,
         ProfileRef,
         Profile,
     },
@@ -33,7 +37,18 @@ pub struct State {
     pub available_profiles: Vec<ProfileRef>,
     pub selected_profile: Option<ProfileRef>,
     pub search_string: String,
+    // // new keybind prompt
     pub dummy_new_keybind: Keybind,
+
+    pub input_list_state_new_keybind: combo_box::State<String>,
+    pub selected_input_new_keybind: Option<String>,
+
+    pub source_list_state_new_keybind: combo_box::State<String>,
+    pub selected_source_new_keybind: Option<String>,
+
+    pub keycode_list_state_new_keybind: combo_box::State<String>,
+    pub selected_keycode_new_keybind: Option<String>,
+
 }
 
 #[derive(Debug, Clone)]
@@ -45,7 +60,24 @@ pub enum Message {
 
 impl State {
     pub fn new(profiles_folder: &PathBuf) -> State {
-        let mut new: State = State{
+
+        let input_items: Vec<String> = input::INPUT_CODES
+            .iter()
+            .flat_map(|input_category| 
+                input_category.iter()
+                    .enumerate()
+                    .filter(|(index, _)| index > &0).map(|(_, elem)| elem)
+                )
+            .map(|input_name| input_name.to_string())
+            .collect();
+
+        let source_items: Vec<String> = keycode::KEYCODES
+            .iter()
+            .map(|category| category.first().unwrap().0.to_string())
+            .collect();
+        let mut new: State = State {
+            input_list_state_new_keybind: combo_box::State::new(input_items),
+            source_list_state_new_keybind: combo_box::State::new(source_items),
             ..Default::default()
         };
 

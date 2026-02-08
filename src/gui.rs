@@ -36,8 +36,8 @@ pub const NAVIGATION_ICON_SIZE: f32 = 40.0;
 
 #[derive(Debug, Clone)]
 pub enum Prompt{
-    UnsavedChanges(fn(&State) -> Element<'static, Message>),
-    NewKeybind( fn(&State) -> Element<'static, Message>),
+    UnsavedChanges(fn(&State) -> Element<'_, Message>),
+    NewKeybind( fn(&State) -> Element<'_, Message>),
 }
 
 pub fn run(state: State) -> iced::Result {

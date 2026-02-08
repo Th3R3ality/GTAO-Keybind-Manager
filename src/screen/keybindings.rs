@@ -34,9 +34,6 @@ use crate::{
     },
     profile::{
         KeybindId,
-        KeybindInput,
-        KeybindSource,
-        KeybindKeycode,
     },
     gui::{
         Prompt,
@@ -49,16 +46,21 @@ use crate::{
 const TOOLBAR_HEIGHT: f32 = 40.0;
 const TOOLBAR_ICON_SIZE: f32 = 28.0;
 
+const KEYBIND_TEXT_SIZE: f32 = 20.0;
+const KEYBIND_SUBTEXT_SIZE: f32 = 12.0;
 const KEYBIND_ROW_PADDING: f32 = 4.0;
 const KEYBIND_HEIGHT: f32 = 50.0;
 const KEYBIND_ICON_SIZE: f32 = 36.0;
+
 
 #[derive(Debug, Clone)]
 pub enum Message {
     ProfileSelected(String),
     Search(String),
     BeginNewKeybind,
-    ModifyNewKeybind(Option<KeybindInput>, Option<KeybindSource>, Option<KeybindKeycode>),
+    SelectNewKeybindInput(String),
+    SelectNewKeybindSource(String),
+    SelectNewKeybindKeycode(String),
     EndNewKeybind,
     CancelNewKeybind,
     DeleteKeybind(KeybindId)
@@ -108,19 +110,35 @@ impl Keybindings {
             Message::BeginNewKeybind => {
                 state.prompt = Some(Prompt::NewKeybind(Self::view_new_keybind));
             },
-            Message::ModifyNewKeybind(input, source, keycode) => {
-                if let Some(input) = input {
-                    state.dummy_new_keybind.0 = input.clone();
-                }
-                if let Some(source) = source {
-                    state.dummy_new_keybind.1 = source.clone();
-                }
-                if let Some(keycode) = keycode {
-                    state.dummy_new_keybind.2 = keycode.clone();
-                }
-            }
+            Message::SelectNewKeybindInput(input_name) => {
+                state.selected_input_new_keybind = Some(input_name.clone());
+                state.dummy_new_keybind.0 = input::get_index(input_name)
+                    .unwrap_or_default();
+            },
+            Message::SelectNewKeybindSource(source_name) => {
+                state.selected_source_new_keybind = Some(source_name.clone());
+                state.dummy_new_keybind.1 = keycode::get_category_index(source_name)
+                    .unwrap_or_default();
+
+                let keycode_list: Vec<String> = keycode::KEYCODES[state.dummy_new_keybind.1]
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(index, elem)| if index > 0 { Some(elem.0.to_string()) } else { None } )
+                    .collect();
+                state.keycode_list_state_new_keybind = combo_box::State::new(keycode_list);
+            },
+            Message::SelectNewKeybindKeycode(keycode_name) => {
+                state.selected_keycode_new_keybind = Some(keycode_name.clone());
+                state.dummy_new_keybind.2 = keycode::get_keycode_index_with_category_index(state.dummy_new_keybind.1, keycode_name)
+                    .unwrap_or_default();
+            },
             Message::EndNewKeybind => {
                 state.prompt = None;
+                if state.dummy_new_keybind.0 == 0 { return };
+                // keycode/2 will always be 0 if source/1 has not been set
+                if state.dummy_new_keybind.2 == 0 { return };
+
+                
                 state.selected_profile.as_ref().map(|profile_ref| {
                     let mut profile = profile_ref.borrow_mut();
                     state.dummy_new_keybind.3 = profile.new_id();
@@ -209,22 +227,22 @@ impl Keybindings {
                     space().width(10),
                     
                     container(column![
-                            text(input).size(20),
-                            text!("#{}", keybind.3).size(12).style(text::warning),
+                            text(input).size(KEYBIND_TEXT_SIZE),
+                            text!("#{}", keybind.3).size(KEYBIND_SUBTEXT_SIZE).style(text::warning),
                     ]).clip(true).width(iced::FillPortion(20)),
 
                     space().width(10),
                     
                     container(column![
-                        text(category.1).size(20),
-                        text(category.2).size(12).style(text::primary),
+                        text(category.1).size(KEYBIND_TEXT_SIZE),
+                        text(category.2).size(KEYBIND_SUBTEXT_SIZE).style(text::primary),
                     ]).clip(true).width(iced::FillPortion(15)),
                     
                     space().width(10),
                     
                     container(column![
-                        text(keycode.2).size(20),
-                        text(keycode.1).size(12).style(text::primary),
+                        text(keycode.2).size(KEYBIND_TEXT_SIZE),
+                        text(keycode.1).size(KEYBIND_SUBTEXT_SIZE).style(text::primary),
                     ]).clip(true).width(iced::FillPortion(10)),
                     
                     container(
@@ -271,26 +289,54 @@ impl Keybindings {
         )
     }
 
-    pub fn view_new_keybind(_state: &State) -> Element<'static, keybind_manager::Message> {
-
+    pub fn view_new_keybind(state: &State) -> Element<'_, keybind_manager::Message> {
 
         let content: Element<'_, Message> = container(container(column![
-        row![
-            // TODO: make these combo boxes (on change send Message::ModifyNewKeybind)
-            text("input"),
-            text("source"),
-            text("key"),
-        ].padding(KEYBIND_ROW_PADDING),
-        row![
-            button(icon(Icon::AddCircle).style(text::success).size(KEYBIND_ICON_SIZE))
-                .on_press(Message::EndNewKeybind)
-                .style(styling::button_transparent),
-            button(icon(Icon::Cancel).style(text::danger).size(KEYBIND_ICON_SIZE))
-                .on_press(Message::CancelNewKeybind)
-                .style(styling::button_transparent),
-        ].padding(KEYBIND_ROW_PADDING)
-        ]).style(container::bordered_box)).center(Length::Fill).style(|_|container::background(Background::Color(color!(0,0,0,0.5))))
-        .into();
+            combo_box(
+                &state.input_list_state_new_keybind, 
+                "Input",
+                state.selected_input_new_keybind.as_ref(),
+                Message::SelectNewKeybindInput
+            )
+            .size(KEYBIND_TEXT_SIZE)
+            .padding(KEYBIND_ROW_PADDING)
+            ,
+            row![
+                combo_box(
+                    &state.source_list_state_new_keybind, 
+                    "Source",
+                    state.selected_source_new_keybind.as_ref(),
+                    Message::SelectNewKeybindSource
+                )
+                .size(KEYBIND_TEXT_SIZE)
+                .padding(KEYBIND_ROW_PADDING)
+                ,
+                combo_box(
+                    &state.keycode_list_state_new_keybind, 
+                    match state.selected_source_new_keybind {
+                        None => "<- Select source",
+                        _ => "Keycode",
+                    },
+                    state.selected_keycode_new_keybind.as_ref(),
+                    Message::SelectNewKeybindKeycode
+                )
+                .size(KEYBIND_TEXT_SIZE)
+                .padding(KEYBIND_ROW_PADDING)
+                ,
+            
+            container(row![
+                button(icon(Icon::AddCircle).style(text::success).size(KEYBIND_ICON_SIZE))
+                    .padding(KEYBIND_ROW_PADDING)
+                    .on_press(Message::EndNewKeybind)
+                    .style(styling::button_transparent),
+                button(icon(Icon::Cancel).style(text::danger).size(KEYBIND_ICON_SIZE))
+                    .padding(KEYBIND_ROW_PADDING)
+                    .on_press(Message::CancelNewKeybind)
+                    .style(styling::button_transparent),
+            ]).align_right(Length::Fill)
+            ],
+            ]).style(container::bordered_box)).center(Length::Fill).style(|_|container::background(Background::Color(color!(0,0,0,0.5))))
+           .into();
         content.map(keybind_manager::Message::Keybindings)
     }
 }
