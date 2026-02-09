@@ -1,8 +1,6 @@
 use iced::{
-    Background,
     Element,
     Length,
-    color,
     widget::{
         combo_box,
         button,
@@ -38,10 +36,9 @@ use crate::{
     gui::{
         Prompt,
     },
-    screen::{
-        Screen,
-    },
 };
+
+const HEADER_TEXT_SIZE: f32 = 28.0;
 
 const TOOLBAR_HEIGHT: f32 = 40.0;
 const TOOLBAR_ICON_SIZE: f32 = 28.0;
@@ -56,12 +53,16 @@ const KEYBIND_ICON_SIZE: f32 = 36.0;
 #[derive(Debug, Clone)]
 pub enum Message {
     ProfileSelected(String),
+    SaveChangesProfileSelected,
+    IgnoreChangesProfileSelected,
+    CancelProfileSelected,
+    SaveSelectedProfile,
     Search(String),
     BeginNewKeybind,
     SelectNewKeybindInput(String),
     SelectNewKeybindSource(String),
     SelectNewKeybindKeycode(String),
-    EndNewKeybind,
+    SaveNewKeybind,
     CancelNewKeybind,
     DeleteKeybind(KeybindId)
 }
@@ -75,40 +76,67 @@ impl Keybindings {
         }
     }
 
+    fn save_selected_profile(state: &State) {
+        state.selected_profile.as_ref().map(|profile_ref| {
+            let mut profile = profile_ref.borrow_mut();
+            if let Err(err) = profile.write_xml(){
+                println!("Error writing xml '{}': {} | {}", profile.name, err.0, err.1);
+            }
+        });
+    }
+        
+    fn load_selected_profile(state: &mut State) {
+        let Some(selected_profile_name) = state.selected_profile_name.as_ref() else { return };
+
+        let Some(profile_ref) = state
+            .available_profiles
+            .iter()
+            .find(|p| &p.borrow().name == selected_profile_name)
+            .cloned() else { return };
+
+        let mut profile = profile_ref.borrow_mut();
+
+        let res = profile.load_xml().err();
+        match res {
+            Some(err) => println!("Error reading xml: {} | {}", err.0, err.1),
+            None => state.selected_profile = Some(profile_ref.clone()),
+        }
+    }
+
     pub fn update(state: &mut State, message: &Message) {
         match message {
             Message::ProfileSelected(name) => {
+                state.selected_profile_name = Some(name.clone());
 
-                // TODO: add unsaved changes prompt
-
-                let Some(profile_ref) = state
-                    .available_profiles
-                    .iter()
-                    .find(|p| &p.borrow().name == name)
-                    .cloned() else { return };
-
-                let mut profile = profile_ref.borrow_mut();
-
-                let res = profile.load_xml().err();
-                match res {
-                    Some(err) => println!("Error: {} | {}", err.0, err.1),
-                    None => {
-                        if let Err(err) = profile.write_xml(){
-                            println!("Error writing xml '{}': {} | {}", profile.name, err.0, err.1);
-                        }
-                        state.selected_profile = Some(profile_ref.clone());
-                        if state.screen == Screen::Landing {
-                            state.screen = Screen::Keybindings(Keybindings::new());
-                        }
-                    },
+                if let Some(profile) = state.selected_profile.as_ref() {
+                    if profile.borrow().modified {
+                        state.prompt = Some(Prompt::UnsavedChanges(Self::view_prompt_unsaved_changes));
+                        return
+                    }
                 }
+                Self::load_selected_profile(state)
+            },
+            Message::SaveChangesProfileSelected => {
+                state.prompt = None;
+                Self::save_selected_profile(state);
+                Self::load_selected_profile(state)
+            },
+            Message::IgnoreChangesProfileSelected => {
+                state.prompt = None;
+                Self::load_selected_profile(state)
+            },
+            Message::CancelProfileSelected => {
+                state.prompt = None
+            }
+            Message::SaveSelectedProfile => {
+                Self::save_selected_profile(state);
             },
             Message::Search(string) => {
                 state.search_string = string.clone();
                 println!("Search: {}", string)
             }
             Message::BeginNewKeybind => {
-                state.prompt = Some(Prompt::NewKeybind(Self::view_new_keybind));
+                state.prompt = Some(Prompt::NewKeybind(Self::view_prompt_new_keybind));
             },
             Message::SelectNewKeybindInput(input_name) => {
                 state.selected_input_new_keybind = Some(input_name.clone());
@@ -132,7 +160,7 @@ impl Keybindings {
                 state.dummy_new_keybind.2 = keycode::get_keycode_index_with_category_index(state.dummy_new_keybind.1, keycode_name)
                     .unwrap_or_default();
             },
-            Message::EndNewKeybind => {
+            Message::SaveNewKeybind => {
                 state.prompt = None;
                 if state.dummy_new_keybind.0 == 0 { return };
                 // keycode/2 will always be 0 if source/1 has not been set
@@ -158,33 +186,49 @@ impl Keybindings {
 
     pub fn view(&self, state: &State) -> (Element<'_, Message>, Element<'_, Message>) {
 
-        
         let available_profile_names: Vec<String> = state.available_profiles
             .iter()
-            .map(|p| p.borrow().name.clone())
+            .map(|profile_ref| profile_ref.borrow().name.clone())
             .collect();
         let selected_profile_name: Option<String> = state.selected_profile
             .as_ref()
-            .map(|p| p.borrow().name.clone());
+            .map(|profile_ref| {
+                let profile = profile_ref.borrow();
+                let modified_tag = if profile.modified {"*"} else {""};
+                format!("{}{}{}", modified_tag, profile.name.clone(), modified_tag)
+            });
 
-        // TODO: make profile name italic when modified flag is set
-        // TODO: add save button when modified flag is set
-        // or activate/deactive save button depending on modified flag
+        let profile_modified_flag: bool = match &state.selected_profile {
+            Some(profile_ref) => if profile_ref.borrow().modified { true } else { false },
+            _ => false,
+        };
+
         let header: Element<'_, Message> = container(
         row![
-            text("Profile: ")
-                .size(28)
-                .align_y(iced::alignment::Vertical::Center)
-                .align_x(iced::alignment::Horizontal::Center)
-                .width(iced::Shrink).height(iced::Fill)
-            ,container(
+            text("Profile:")
+            .size(HEADER_TEXT_SIZE)
+            .align_y(iced::Center)
+            .align_x(iced::Center)
+            .width(iced::Shrink).height(iced::Fill),
+            space().width(Length::Fixed(HEADER_TEXT_SIZE / 2.0)),
+            container(
                 pick_list(
                     available_profile_names,
                     selected_profile_name,
                     Message::ProfileSelected
                 )
                 .placeholder("none")
-                .text_size(28)
+                .text_size(HEADER_TEXT_SIZE)
+            )
+            .height(iced::Fill)
+            .align_y(iced::Center),
+            space().width(Length::Fixed(HEADER_TEXT_SIZE / 4.0)),
+            container(
+                button(
+                    icon( if profile_modified_flag { Icon::SaveAs } else { Icon::Save }).size(HEADER_TEXT_SIZE).center()
+                    .style( if profile_modified_flag { text::warning } else { text::default })
+                )
+                .on_press_maybe( if profile_modified_flag { Some(Message::SaveSelectedProfile) } else { None }).style(styling::button_transparent)
             )
             .height(iced::Fill)
             .align_y(iced::Center),
@@ -194,8 +238,8 @@ impl Keybindings {
         let Some(profile_ref) = &state.selected_profile else {
             return (container(text("No Profile Selected").center()).center(Length::Fill).into(), header)
         };
-        
         let profile = profile_ref.borrow();
+        
         let keybinds = &profile.keybinds;
         if profile.keybinds.len() <= 0 {
             return (
@@ -289,9 +333,43 @@ impl Keybindings {
         )
     }
 
-    pub fn view_new_keybind(state: &State) -> Element<'_, keybind_manager::Message> {
+    pub fn view_prompt_unsaved_changes(_state: &State) -> Element<'_, keybind_manager::Message> {
 
-        let content: Element<'_, Message> = container(container(column![
+        let content: Element<'_, Message> =
+        container(column![
+            text("You have unsaved changes!").size(KEYBIND_TEXT_SIZE),
+            row![
+                container(row![
+                    button(row![
+                        text("Save").size(KEYBIND_TEXT_SIZE),
+                        icon(Icon::AddCircle).style(text::success).size(KEYBIND_ICON_SIZE)
+                    ])
+                    .padding(KEYBIND_ROW_PADDING)
+                    .on_press(Message::SaveChangesProfileSelected)
+                    .style(button::success),
+                    button(row![
+                        text("Ignore").size(KEYBIND_TEXT_SIZE),
+                        icon(Icon::AddCircle).style(text::success).size(KEYBIND_ICON_SIZE)
+                    ])
+                    .padding(KEYBIND_ROW_PADDING)
+                    .on_press(Message::IgnoreChangesProfileSelected)
+                    .style(button::danger),
+                    button(row![
+                        text("Cancel").size(KEYBIND_TEXT_SIZE),
+                        icon(Icon::Cancel).style(text::danger).size(KEYBIND_ICON_SIZE)
+                    ])
+                    .padding(KEYBIND_ROW_PADDING)
+                    .on_press(Message::CancelProfileSelected)
+                    .style(button::warning),
+                ]).align_right(Length::Fill)
+            ],
+        ]).style(container::bordered_box).into();
+        
+        content.map(keybind_manager::Message::Keybindings)
+    }
+    pub fn view_prompt_new_keybind(state: &State) -> Element<'_, keybind_manager::Message> {
+
+        let content: Element<'_, Message> = container(column![
             combo_box(
                 &state.input_list_state_new_keybind, 
                 "Input",
@@ -299,8 +377,8 @@ impl Keybindings {
                 Message::SelectNewKeybindInput
             )
             .size(KEYBIND_TEXT_SIZE)
-            .padding(KEYBIND_ROW_PADDING)
-            ,
+            .padding(KEYBIND_ROW_PADDING),
+
             row![
                 combo_box(
                     &state.source_list_state_new_keybind, 
@@ -309,8 +387,8 @@ impl Keybindings {
                     Message::SelectNewKeybindSource
                 )
                 .size(KEYBIND_TEXT_SIZE)
-                .padding(KEYBIND_ROW_PADDING)
-                ,
+                .padding(KEYBIND_ROW_PADDING),
+
                 combo_box(
                     &state.keycode_list_state_new_keybind, 
                     match state.selected_source_new_keybind {
@@ -321,22 +399,20 @@ impl Keybindings {
                     Message::SelectNewKeybindKeycode
                 )
                 .size(KEYBIND_TEXT_SIZE)
-                .padding(KEYBIND_ROW_PADDING)
-                ,
+                .padding(KEYBIND_ROW_PADDING),
             
-            container(row![
-                button(icon(Icon::AddCircle).style(text::success).size(KEYBIND_ICON_SIZE))
-                    .padding(KEYBIND_ROW_PADDING)
-                    .on_press(Message::EndNewKeybind)
-                    .style(styling::button_transparent),
-                button(icon(Icon::Cancel).style(text::danger).size(KEYBIND_ICON_SIZE))
-                    .padding(KEYBIND_ROW_PADDING)
-                    .on_press(Message::CancelNewKeybind)
-                    .style(styling::button_transparent),
-            ]).align_right(Length::Fill)
+                container(row![
+                    button(icon(Icon::AddCircle).style(text::success).size(KEYBIND_ICON_SIZE))
+                        .padding(KEYBIND_ROW_PADDING)
+                        .on_press(Message::SaveNewKeybind)
+                        .style(styling::button_transparent),
+                    button(icon(Icon::Cancel).style(text::danger).size(KEYBIND_ICON_SIZE))
+                        .padding(KEYBIND_ROW_PADDING)
+                        .on_press(Message::CancelNewKeybind)
+                        .style(styling::button_transparent),
+                ]).align_right(Length::Fill)
             ],
-            ]).style(container::bordered_box)).center(Length::Fill).style(|_|container::background(Background::Color(color!(0,0,0,0.5))))
-           .into();
+        ]).style(container::bordered_box).into();
         content.map(keybind_manager::Message::Keybindings)
     }
 }

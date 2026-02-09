@@ -1,10 +1,12 @@
 use iced::{
     Border,
     Element,
+    color,
     Task,
     Theme,
     window,
     Length,
+    Background,
     widget::{
         opaque,
         stack,
@@ -117,13 +119,22 @@ fn view(state: &State) -> Element<'_, Message> {
     });
 
     
-    let prompt = container(opaque(
-        match state.prompt {
-            Some(Prompt::NewKeybind(fun)) => fun(state),
-            Some(Prompt::UnsavedChanges(fun)) => fun(state),
-            None => space().into(),
-        }
-    )).center(Length::Fill);
+    let prompt: Element<'_, Message> = if state.prompt.is_none() {
+        space().into()
+    }
+    else {
+        opaque(container(
+            match state.prompt {
+                Some(Prompt::NewKeybind(fun)) => fun(state),
+                Some(Prompt::UnsavedChanges(fun)) => fun(state),
+                None => space().into(),
+            }
+        )
+        .center(Length::Fill)
+        .style(|_|container::background(Background::Color(color!(0,0,0,0.5))))
+        )
+    };
+
     stack![
         column![
             header,

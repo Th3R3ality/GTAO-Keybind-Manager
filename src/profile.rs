@@ -4,8 +4,10 @@ use std::{
     }, fs::{
         self,
         OpenOptions,
-    }, io::Write, path::PathBuf, rc::Rc
+    }, io::Write, path::{Path, PathBuf}, rc::Rc
 };
+
+use chrono::Local;
 
 use crate::{
     input,
@@ -56,9 +58,31 @@ impl Profile{
         self.modified = true;
     }
 
-    pub fn write_xml(&self) -> std::result::Result<(), (String, String)> {
+    /// writes profile to file and marks it as p.modified = false on success
+    pub fn write_xml(&mut self) -> std::result::Result<(), (String, String)> {
 
-        let path = self.path.with_added_extension("txt");
+        let parent = self.path.parent().unwrap_or(Path::new(""));
+        let filename = self.path
+            .file_stem()
+            .unwrap()
+            .to_string_lossy();
+
+        let suffix = Local::now().format("_%d_%m_%y_%H%M").to_string();
+
+        let mut counter = 0;
+        let mut backup_path = parent.join(format!("{filename}{suffix}")).with_extension("backup");
+        while backup_path.exists() {
+            counter += 1;
+            backup_path = parent.join(format!("{filename}{suffix}__{counter}")).with_extension("backup");
+        }
+
+        let res = fs::copy(&self.path, &backup_path);
+        if let Err(err) = res {
+            return Err((format!("couldn't backup profile: {}", self.name), err.to_string()))
+        }
+
+
+        let path = &self.path;
         let file = OpenOptions::new()
             .create(true)
             .truncate(true)
@@ -100,15 +124,18 @@ impl Profile{
             },
         }
         
+        self.modified = false;
         Ok(())
     }
 
     pub fn load_xml(&mut self) -> std::result::Result<(), (String, String)> {
-        let lines: Vec<String> = fs::read_to_string(&self.path)
-            .unwrap()
-            .lines()
-            .map(String::from)
-            .collect();
+        
+        let res = fs::read_to_string(&self.path);
+
+        let lines: Vec<String> = match res {
+            Ok(string) => string.lines().map(String::from).collect(),
+            Err(_) => return Err(("".to_owned(),"".to_owned())),
+        };
 
         let mut iter= lines.iter().enumerate();
         
@@ -205,6 +232,7 @@ impl Profile{
         }
 
         self.keybinds = keybind_collector;
+        self.modified = false;
         Ok(())
     }
 

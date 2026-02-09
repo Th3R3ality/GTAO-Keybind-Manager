@@ -25,7 +25,7 @@ use crate::{
     },
 };
 
-pub const VERSION: &str = &"0.0";
+pub const VERSION: &str = &"0.1";
 
 #[derive(Debug, Clone, Default)]
 pub struct State {
@@ -36,7 +36,9 @@ pub struct State {
     // keybindings screen
     pub available_profiles: Vec<ProfileRef>,
     pub selected_profile: Option<ProfileRef>,
+    pub selected_profile_name: Option<String>,
     pub search_string: String,
+    
     // // new keybind prompt
     pub dummy_new_keybind: Keybind,
 

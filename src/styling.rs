@@ -41,8 +41,8 @@ fn button_disabled(style: button::Style) -> button::Style {
     button::Style {
         background: style
             .background
-            .map(|background| background.scale_alpha(0.5)),
-        text_color: style.text_color.scale_alpha(0.5),
+            .map(|background| background.scale_alpha(0.35)),
+        text_color: style.text_color.scale_alpha(0.35),
         ..style
     }
 }
