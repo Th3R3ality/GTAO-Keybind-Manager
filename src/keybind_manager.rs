@@ -25,7 +25,7 @@ use crate::{
     },
 };
 
-pub const VERSION: &str = &"0.1";
+pub const VERSION: &str = &"0.1.1";
 
 #[derive(Debug, Clone, Default)]
 pub struct State {
@@ -88,13 +88,7 @@ impl State {
         return new
     }
     pub fn title(&self) -> String {
-
-        match self.selected_profile.as_ref() {
-            None => format!("GTAO Keybind Manager {} by Reality", VERSION).to_owned(),
-            Some(profile_ref) => {
-                format!("GTAO Keybind Manager {} by Reality | Profile: {}", VERSION, profile_ref.borrow().name).to_owned()
-            },
-        }
+        format!("GTAO Keybind Manager {}", VERSION)
     }
     fn discover_profiles(&mut self, profiles_folder: &PathBuf) -> std::io::Result<()>{
         for entry in fs::read_dir(profiles_folder)? {
