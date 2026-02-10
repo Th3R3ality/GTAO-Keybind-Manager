@@ -57,6 +57,11 @@ const UNSAVED_BUTTON_TEXT_SIZE: f32 = 20.0;
 const UNSAVED_BUTTON_ICON_SIZE: f32 = 28.0;
 const UNSAVED_BUTTON_PADDING: f32 = 14.0;
 
+const NEWKEYBIND_PROMPT_WIDTH: f32 = 600.0;
+const NEWKEYBIND_BUTTON_ICON_SIZE: f32 = 36.0;
+const NEWKEYBIND_BUTTON_PADDING: f32 = 8.0;
+const NEWKEYBIND_COMBO_PADDING: f32 = 12.0;
+
 #[derive(Debug, Clone)]
 pub enum Message {
     ProfileSelected(String),
@@ -343,90 +348,105 @@ impl Keybindings {
     pub fn view_prompt_unsaved_changes(_state: &State) -> Element<'_, keybind_manager::Message> {
 
         let content: Element<'_, Message> =
-        row![
-            container(column![
-                container(
-                    text("You have unsaved changes!").size(UNSAVED_TITLE_SIZE).center()
-                ).padding(iced::padding::vertical(UNSAVED_TITLE_PADDING))
-                .center_x(Length::Fill),
-                space().height(UNSAVED_TITLE_GAP),
+        container(column![
+            container(
+                text("You have unsaved changes!").size(UNSAVED_TITLE_SIZE).center()
+            ).padding(iced::padding::vertical(UNSAVED_TITLE_PADDING))
+            .center_x(Length::Fill),
+            space().height(UNSAVED_TITLE_GAP),
+            container(row![
                 container(row![
-                    container(row![
-                        button(row![
-                            text("Save  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
-                            icon(Icon::AddCircle).size(UNSAVED_BUTTON_ICON_SIZE).center()
-                        ].align_y(iced::Center))
-                        .on_press(Message::SaveChangesProfileSelected)
-                        .style(button::success),
-                        space().width(UNSAVED_BUTTON_PADDING),
-                        button(row![
-                            text("Ignore  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
-                            icon(Icon::Block).size(UNSAVED_BUTTON_ICON_SIZE).center()
-                        ].align_y(iced::Center))
-                        .on_press(Message::IgnoreChangesProfileSelected)
-                        .style(button::danger),
-                        space().width(UNSAVED_BUTTON_PADDING),
-                        button(row![
-                            text("Cancel  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
-                            icon(Icon::Cancel).size(UNSAVED_BUTTON_ICON_SIZE).center()
-                        ].align_y(iced::Center))
-                        .on_press(Message::CancelProfileSelected)
-                        .style(button::warning),
-                    ]).align_right(Length::Fill)
-                ]).padding(UNSAVED_BUTTON_PADDING),
-            ])
-            .style(container::bordered_box)
-            .width(Length::Fixed(UNSAVED_PROMPT_WIDTH)),
-        ].into();
+                    button(row![
+                        text("Save  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
+                        icon(Icon::AddCircle).size(UNSAVED_BUTTON_ICON_SIZE).center()
+                    ].align_y(iced::Center))
+                    .on_press(Message::SaveChangesProfileSelected)
+                    .style(button::success),
+                    space().width(UNSAVED_BUTTON_PADDING),
+                    button(row![
+                        text("Ignore  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
+                        icon(Icon::Block).size(UNSAVED_BUTTON_ICON_SIZE).center()
+                    ].align_y(iced::Center))
+                    .on_press(Message::IgnoreChangesProfileSelected)
+                    .style(button::danger),
+                    space().width(UNSAVED_BUTTON_PADDING),
+                    button(row![
+                        text("Cancel  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
+                        icon(Icon::Cancel).size(UNSAVED_BUTTON_ICON_SIZE).center()
+                    ].align_y(iced::Center))
+                    .on_press(Message::CancelProfileSelected)
+                    .style(button::warning),
+                ]).align_right(Length::Fill)
+            ]).padding(UNSAVED_BUTTON_PADDING),
+        ])
+        .style(container::bordered_box)
+        .width(Length::Fixed(UNSAVED_PROMPT_WIDTH))
+        .into();
         
         content.map(keybind_manager::Message::Keybindings)
     }
     pub fn view_prompt_new_keybind(state: &State) -> Element<'_, keybind_manager::Message> {
 
-        let content: Element<'_, Message> = container(column![
-            combo_box(
-                &state.input_list_state_new_keybind, 
-                "Input",
-                state.selected_input_new_keybind.as_ref(),
-                Message::SelectNewKeybindInput
+        let content: Element<'_, Message> =
+        container(column![
+            container(
+                combo_box(
+                    &state.input_list_state_new_keybind, 
+                    "Input",
+                    state.selected_input_new_keybind.as_ref(),
+                    Message::SelectNewKeybindInput
+                )
+                .size(KEYBIND_TEXT_SIZE)
             )
-            .size(KEYBIND_TEXT_SIZE)
-            .padding(KEYBIND_ROW_PADDING),
+            .padding(NEWKEYBIND_COMBO_PADDING),
 
             row![
-                combo_box(
-                    &state.source_list_state_new_keybind, 
-                    "Source",
-                    state.selected_source_new_keybind.as_ref(),
-                    Message::SelectNewKeybindSource
+                container(
+                    combo_box(
+                        &state.source_list_state_new_keybind, 
+                        "Source",
+                        state.selected_source_new_keybind.as_ref(),
+                        Message::SelectNewKeybindSource
+                    )
+                    .size(KEYBIND_TEXT_SIZE),
                 )
-                .size(KEYBIND_TEXT_SIZE)
-                .padding(KEYBIND_ROW_PADDING),
-
-                combo_box(
-                    &state.keycode_list_state_new_keybind, 
-                    match state.selected_source_new_keybind {
-                        None => "<- Select source",
-                        _ => "Keycode",
-                    },
-                    state.selected_keycode_new_keybind.as_ref(),
-                    Message::SelectNewKeybindKeycode
+                .padding( iced::padding::horizontal(NEWKEYBIND_COMBO_PADDING)),
+                container(
+                    combo_box(
+                        &state.keycode_list_state_new_keybind, 
+                        match state.selected_source_new_keybind {
+                            None => "<- Select source",
+                            _ => "Keycode",
+                        },
+                        state.selected_keycode_new_keybind.as_ref(),
+                        Message::SelectNewKeybindKeycode
+                    )
+                    .size(KEYBIND_TEXT_SIZE),
                 )
-                .size(KEYBIND_TEXT_SIZE)
-                .padding(KEYBIND_ROW_PADDING),
-            
+                .width(Length::Fill),
                 container(row![
-                    button(icon(Icon::AddCircle).style(text::success).size(KEYBIND_ICON_SIZE))
-                        .padding(KEYBIND_ROW_PADDING)
-                        .on_press(Message::SaveNewKeybind)
-                        .style(styling::button_transparent),
-                    button(icon(Icon::Cancel).style(text::danger).size(KEYBIND_ICON_SIZE))
-                        .padding(KEYBIND_ROW_PADDING)
-                        .on_press(Message::CancelNewKeybind)
-                        .style(styling::button_transparent),
-                ]).align_right(Length::Fill)
-            ],
-        ]).style(container::bordered_box).into();
+                    button(icon(Icon::AddCircle).style(match state.dummy_new_keybind {
+                            (input, source, keycode, _) if input > 0 && source > 0 && keycode > 0 => text::success,
+                            _ => text::default,
+                        })
+                        .size(NEWKEYBIND_BUTTON_ICON_SIZE))
+                        .on_press_maybe( match state.dummy_new_keybind {
+                            (input, source, keycode, _) if input > 0 && source > 0 && keycode > 0 => Some(Message::SaveNewKeybind),
+                            _ => None,
+                        })
+                    .style(styling::button_transparent),
+                    space().width(NEWKEYBIND_BUTTON_PADDING),
+                    button(icon(Icon::Cancel).style(text::danger).size(NEWKEYBIND_BUTTON_ICON_SIZE))
+                    .on_press(Message::CancelNewKeybind)
+                    .style(styling::button_transparent),
+                ])
+                .padding(NEWKEYBIND_BUTTON_PADDING)
+                .align_right(Length::Shrink)
+            ].align_y(iced::Center),
+        ])
+        .style(container::bordered_box)
+        .width(Length::Fixed(NEWKEYBIND_PROMPT_WIDTH))
+        .into();
         content.map(keybind_manager::Message::Keybindings)
     }
 }
