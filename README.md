@@ -19,10 +19,12 @@
 <br>
 
 ## Useful information
-1. A profile refers to a rockstar games account so if you only have one there will probably only be one profile. <br>
+1. Currently i dont show the default keybinds so you will need to know how these keybinds will alter your ingame binds (tldr; if you bind a key it will have its default binds removed ((i think)), for default binds check /controls/default_binds.txt )
+
+2. A profile refers to a rockstar games account so if you only have one there will probably only be one profile. <br>
 Currently i don't know of a way to get the username from this folder so trial and error if you have multiple :)
 
-3. Backups are automatically created every time you save a profile and are located at:
+2. Backups are automatically created every time you save a profile and are located at:
    ```
    Rockstar Games > GTA/Enhanced > Profiles > [profile] > Controls > user_[date].backup
    ```
