@@ -321,7 +321,8 @@ impl Keybindings {
     
         let toolbar = container(
             row![
-                text_input("Search            Examples    \"weapon\"    \"i:frontend\"    \"s:mouse\"    \"k:enter\"", &state.search_string)
+                //text_input("Search            Examples    \"weapon\"    \"i:frontend\"    \"s:mouse\"    \"k:enter\"", &state.search_string)
+                text_input("Search     ! not implemented !", &state.search_string)
                 .on_input(Message::Search)
                 .line_height(LineHeight::Absolute(TOOLBAR_HEIGHT.into()))
                 .size(24),
