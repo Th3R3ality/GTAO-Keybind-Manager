@@ -49,6 +49,13 @@ const KEYBIND_ROW_PADDING: f32 = 4.0;
 const KEYBIND_HEIGHT: f32 = 50.0;
 const KEYBIND_ICON_SIZE: f32 = 36.0;
 
+const UNSAVED_PROMPT_WIDTH: f32 = 500.0;
+const UNSAVED_TITLE_SIZE: f32 = 28.0;
+const UNSAVED_TITLE_PADDING: f32 = 24.0;
+const UNSAVED_TITLE_GAP: f32 = 48.0; // space().height() between title and buttons
+const UNSAVED_BUTTON_TEXT_SIZE: f32 = 20.0;
+const UNSAVED_BUTTON_ICON_SIZE: f32 = 28.0;
+const UNSAVED_BUTTON_PADDING: f32 = 14.0;
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -336,34 +343,41 @@ impl Keybindings {
     pub fn view_prompt_unsaved_changes(_state: &State) -> Element<'_, keybind_manager::Message> {
 
         let content: Element<'_, Message> =
-        container(column![
-            text("You have unsaved changes!").size(KEYBIND_TEXT_SIZE),
-            row![
+        row![
+            container(column![
+                container(
+                    text("You have unsaved changes!").size(UNSAVED_TITLE_SIZE).center()
+                ).padding(iced::padding::vertical(UNSAVED_TITLE_PADDING))
+                .center_x(Length::Fill),
+                space().height(UNSAVED_TITLE_GAP),
                 container(row![
-                    button(row![
-                        text("Save").size(KEYBIND_TEXT_SIZE),
-                        icon(Icon::AddCircle).style(text::success).size(KEYBIND_ICON_SIZE)
-                    ])
-                    .padding(KEYBIND_ROW_PADDING)
-                    .on_press(Message::SaveChangesProfileSelected)
-                    .style(button::success),
-                    button(row![
-                        text("Ignore").size(KEYBIND_TEXT_SIZE),
-                        icon(Icon::AddCircle).style(text::success).size(KEYBIND_ICON_SIZE)
-                    ])
-                    .padding(KEYBIND_ROW_PADDING)
-                    .on_press(Message::IgnoreChangesProfileSelected)
-                    .style(button::danger),
-                    button(row![
-                        text("Cancel").size(KEYBIND_TEXT_SIZE),
-                        icon(Icon::Cancel).style(text::danger).size(KEYBIND_ICON_SIZE)
-                    ])
-                    .padding(KEYBIND_ROW_PADDING)
-                    .on_press(Message::CancelProfileSelected)
-                    .style(button::warning),
-                ]).align_right(Length::Fill)
-            ],
-        ]).style(container::bordered_box).into();
+                    container(row![
+                        button(row![
+                            text("Save  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
+                            icon(Icon::AddCircle).size(UNSAVED_BUTTON_ICON_SIZE).center()
+                        ].align_y(iced::Center))
+                        .on_press(Message::SaveChangesProfileSelected)
+                        .style(button::success),
+                        space().width(UNSAVED_BUTTON_PADDING),
+                        button(row![
+                            text("Ignore  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
+                            icon(Icon::Block).size(UNSAVED_BUTTON_ICON_SIZE).center()
+                        ].align_y(iced::Center))
+                        .on_press(Message::IgnoreChangesProfileSelected)
+                        .style(button::danger),
+                        space().width(UNSAVED_BUTTON_PADDING),
+                        button(row![
+                            text("Cancel  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
+                            icon(Icon::Cancel).size(UNSAVED_BUTTON_ICON_SIZE).center()
+                        ].align_y(iced::Center))
+                        .on_press(Message::CancelProfileSelected)
+                        .style(button::warning),
+                    ]).align_right(Length::Fill)
+                ]).padding(UNSAVED_BUTTON_PADDING),
+            ])
+            .style(container::bordered_box)
+            .width(Length::Fixed(UNSAVED_PROMPT_WIDTH)),
+        ].into();
         
         content.map(keybind_manager::Message::Keybindings)
     }
