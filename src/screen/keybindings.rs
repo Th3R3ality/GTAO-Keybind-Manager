@@ -152,15 +152,15 @@ impl Keybindings {
             },
             Message::SelectNewKeybindInput(input_name) => {
                 state.selected_input_new_keybind = Some(input_name.clone());
-                state.dummy_new_keybind.0 = input::get_index(input_name)
-                    .unwrap_or_default();
+                state.dummy_new_keybind.0 = input::get_index(input_name);
             },
             Message::SelectNewKeybindSource(source_name) => {
                 state.selected_source_new_keybind = Some(source_name.clone());
-                state.dummy_new_keybind.1 = keycode::get_category_index(source_name)
-                    .unwrap_or_default();
+                state.dummy_new_keybind.1 = keycode::get_category_index(source_name);
 
-                let keycode_list: Vec<String> = keycode::KEYCODES[state.dummy_new_keybind.1]
+                let Some(source) = state.dummy_new_keybind.1 else { return };
+
+                let keycode_list: Vec<String> = keycode::KEYCODES[source]
                     .iter()
                     .enumerate()
                     .filter_map(|(index, elem)| if index > 0 { Some(elem.0.to_string()) } else { None } )
@@ -169,20 +169,18 @@ impl Keybindings {
             },
             Message::SelectNewKeybindKeycode(keycode_name) => {
                 state.selected_keycode_new_keybind = Some(keycode_name.clone());
-                state.dummy_new_keybind.2 = keycode::get_keycode_index_with_category_index(state.dummy_new_keybind.1, keycode_name)
-                    .unwrap_or_default();
+                let Some(source) = state.dummy_new_keybind.1 else { return };
+                state.dummy_new_keybind.2 = keycode::get_keycode_index_with_category_index(source, keycode_name);
             },
             Message::SaveNewKeybind => {
                 state.prompt = None;
-                if state.dummy_new_keybind.0 == 0 { return };
-                // keycode/2 will always be 0 if source/1 has not been set
-                if state.dummy_new_keybind.2 == 0 { return };
 
+                let (Some(input), Some(source), Some(keycode)) = state.dummy_new_keybind else { return };
                 
                 state.selected_profile.as_ref().map(|profile_ref| {
                     let mut profile = profile_ref.borrow_mut();
-                    state.dummy_new_keybind.3 = profile.new_id();
-                    profile.add_keybind(state.dummy_new_keybind);
+                    let id = profile.new_id();
+                    profile.add_keybind((input, source, keycode, id));
                 });
             }
             Message::CancelNewKeybind => {
@@ -427,12 +425,12 @@ impl Keybindings {
                 .width(Length::Fill),
                 container(row![
                     button(icon(Icon::AddCircle).style(match state.dummy_new_keybind {
-                            (input, source, keycode, _) if input > 0 && source > 0 && keycode > 0 => text::success,
+                            (Some(_), Some(_), Some(_)) => text::success,
                             _ => text::default,
                         })
                         .size(NEWKEYBIND_BUTTON_ICON_SIZE))
                         .on_press_maybe( match state.dummy_new_keybind {
-                            (input, source, keycode, _) if input > 0 && source > 0 && keycode > 0 => Some(Message::SaveNewKeybind),
+                            (Some(_), Some(_), Some(_)) => Some(Message::SaveNewKeybind),
                             _ => None,
                         })
                     .style(styling::button_transparent),

@@ -19,6 +19,7 @@ pub type KeybindSource = usize;
 pub type KeybindKeycode = usize;
 pub type KeybindId = usize;
 pub type Keybind = (KeybindInput, KeybindSource, KeybindKeycode, KeybindId);
+pub type KeybindBuilder = (Option<usize>, Option<usize>, Option<usize>);
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Profile {
     pub name: String,
@@ -146,7 +147,7 @@ impl Profile{
         }
         
         let mut keybind_collector: Vec<Keybind> = Vec::new();
-        let mut keybind_builder: (Option<usize>, Option<usize>, Option<usize>) = (None, None, None);
+        let mut keybind_builder: KeybindBuilder = (None, None, None);
         let mut keybind_builder_names: (Option<String>, Option<String>, Option<String>) = (None, None, None);
         while let Some((_, line)) = iter.next()
         {

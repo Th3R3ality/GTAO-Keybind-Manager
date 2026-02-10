@@ -16,7 +16,7 @@ use crate::{
         about,
     },
     profile::{
-        Keybind,
+        KeybindBuilder,
         ProfileRef,
         Profile,
     },
@@ -25,7 +25,7 @@ use crate::{
     },
 };
 
-pub const VERSION: &str = &"0.1.1";
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(Debug, Clone, Default)]
 pub struct State {
@@ -40,7 +40,7 @@ pub struct State {
     pub search_string: String,
     
     // // new keybind prompt
-    pub dummy_new_keybind: Keybind,
+    pub dummy_new_keybind: KeybindBuilder,
 
     pub input_list_state_new_keybind: combo_box::State<String>,
     pub selected_input_new_keybind: Option<String>,
