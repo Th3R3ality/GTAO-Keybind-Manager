@@ -1,10 +1,7 @@
 # A tool to help you make custom keybinds
 > This was my first project written in rust!
 
-<br>
-<br>
-
-## Usage
+# Usage
 
 0. Open the program which *should* prompt you to pick a directory
 
@@ -15,10 +12,33 @@
    ```
   > Usually located in your **My Documents** folder.
 
-<br>
-<br>
+# Screenshots
+<details>
+<summary>
+   Click me!
+</summary>
 
-## Useful information
+Start Screen
+![](/assets/ss/landing.png)
+
+Keybinding Page
+![](/assets/ss/keybindings.png)
+
+New Keybind
+![](/assets/ss/new_keybind.png)
+
+Unsaved Changes
+![](/assets/ss/unsaved_changes.png)
+
+Mismatch
+![](/assets/ss/mismatch.png)
+
+Info Screen
+![](/assets/ss/info.png)
+
+</details>
+
+# Useful information
 1. Currently i dont show the default keybinds so you will need to know how these keybinds will alter your ingame binds `(tldr; if you bind a key it will have its default binds removed ((i think)), for default binds check /controls/default_binds.txt)`
 
 2. A profile refers to a rockstar games account so if you only have one there will probably only be one profile. <br>
@@ -44,10 +64,14 @@ Currently i don't know of a way to get the username from this folder so trial an
    /Users/<user>/Library/Application Support/.keybindmanager/config.txt
    ```
 
-## For the Future
+# For the Future
 1. presets and preset sharing via code
 2. keyboard screen, visualised keyboard with tooltips showing what each key is bound to, recolor non-default binds
 3. implement localization using localization mappings (/controls/keyboard layout/)
 4. add search
 5. ???
 6. profit!
+
+# Credits
+
+[Google Material Icons](https://fonts.google.com/icons?icon.set=Material+Icons)
