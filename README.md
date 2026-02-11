@@ -41,6 +41,11 @@ Info Screen <br>
 </details>
 
 # Useful information
+1. To reload keybinds without restarting your game open go to
+    ``` Pause > Settings > Keybinds ```
+   open the keybinds menu and back out of it
+> if you have "illegal" binds ( like unbinding all-chat ) accept the alert when backing out of the menu, it doesnt actually revert changes
+
 1. Currently i dont show the default keybinds so you will need to know how these keybinds will alter your ingame binds `(tldr; if you bind a key it will have its default binds removed ((i think)), for default binds check /controls/default_binds.txt)`
 
 2. A profile refers to a rockstar games account so if you only have one there will probably only be one profile. <br>
