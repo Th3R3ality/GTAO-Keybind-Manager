@@ -119,9 +119,16 @@ impl Keybindings {
 
         let res = profile.load().err();
         match res {
-            Some(err) => println!("Error reading xml: {} | {}", err.0, err.1),
+            Some(err) => println!("load: Error reading xml: {} | {}", err.0, err.1),
             None => state.selected_profile = Some(profile_ref.clone()),
         }
+    }
+    fn restore_selected_profile(state: &mut State) {
+        state.selected_profile.as_ref().map(|profile_ref|{
+            let mut profile = profile_ref.borrow_mut();
+            profile.restore().err().map(|err| println!("restore: Error reading xml: {} | {}", err.0, err.1));
+        });
+        ()
     }
 
     pub fn verify_latest(state: &mut State){
@@ -143,7 +150,8 @@ impl Keybindings {
                         return
                     }
                 }
-                Self::load_selected_profile(state)
+                Self::load_selected_profile(state);
+                Self::verify_latest(state);
             },
             Message::SaveChangesToSelectedProfile => {
                 state.prompt = None;
@@ -210,6 +218,7 @@ impl Keybindings {
             },
             Message::MismatchRestore => {
                 state.prompt = None;
+                Self::restore_selected_profile(state);
                 Self::save_selected_profile(state);
             }
             Message::MismatchReload => {

@@ -148,7 +148,6 @@ impl Profile{
     }
 
     pub fn load(&mut self) -> std::result::Result<(), (String, String)> {
-
         let res = Self::load_xml(&self.path);
         match res {
             Err(err) => return Err(err),
@@ -161,9 +160,23 @@ impl Profile{
                 self.keybinds = keybinds;
             }
         }
-
         self.modified = false;
-
+        Ok(())
+    }
+    pub fn restore(&mut self) -> std::result::Result<(), (String, String)> {
+        let res = Self::load_xml(&self.latest_path);
+        match res {
+            Err(err) => return Err(err),
+            Ok(mut keybinds) => {
+                for keybind in &mut keybinds {
+                    if keybind.3 == 0 {
+                        keybind.3 = self.next_id();
+                    }
+                }
+                self.keybinds = keybinds;
+            }
+        }
+        self.modified = false;
         Ok(())
     }
     pub fn verify_latest(&self) -> bool {
