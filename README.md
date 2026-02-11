@@ -17,23 +17,25 @@
 <summary>
    Click me!
 </summary>
-
-Start Screen
+   
+<br>
+   
+Start Screen <br>
 ![](/assets/ss/landing.png)
 
-Keybinding Page
+Keybinding Page <br>
 ![](/assets/ss/keybindings.png)
 
-New Keybind
+New Keybind <br>
 ![](/assets/ss/new_keybind.png)
 
-Unsaved Changes
+Unsaved Changes <br>
 ![](/assets/ss/unsaved_changes.png)
 
-Mismatch
+Mismatch <br>
 ![](/assets/ss/mismatch.png)
 
-Info Screen
+Info Screen <br>
 ![](/assets/ss/info.png)
 
 </details>
