@@ -67,7 +67,7 @@ impl Config {
     pub fn try_get_parent_dir() -> Option<PathBuf> {
         match config_local_dir() {
             Some(dir) => {
-                println!("INFO: try_get_parent_dir: {}", dir.clone().into_os_string().to_string_lossy());
+                //println!("INFO: try_get_parent_dir: {}", dir.clone().into_os_string().to_string_lossy());
                 Some(dir)
             },
             None => None,
@@ -75,29 +75,29 @@ impl Config {
     }
     pub fn try_get_or_create_config_dir() -> Option<PathBuf> {
         if let Some(dir) = Self::try_get_config_dir() { 
-            println!("SUCC: try_get_or_create_config_dir: try_get_config_dir"); 
+            //println!("SUCC: try_get_or_create_config_dir: try_get_config_dir"); 
             return Some(dir)
         }
         let Some(dir) = Self::try_get_config_dir_unchecked() else { 
-            println!("ERR: try_get_or_create_config_dir: try_get_config_dir_unchecked"); 
+            //println!("ERR: try_get_or_create_config_dir: try_get_config_dir_unchecked"); 
             return None 
         };
         let res = fs::create_dir(&dir);
         match res {
             Ok(_) => Some(dir),
             Err(_) => {
-                println!("ERR: try_get_or_create_config_path: create_dir");
+                //println!("ERR: try_get_or_create_config_path: create_dir");
                 None
             },
         }
     }
     pub fn try_get_or_create_config_path() -> Option<PathBuf> {
         let Some(_) = Self::try_get_or_create_config_dir() else { 
-            println!("ERR: try_get_or_create_config_path: try_get_or_create_config_dir");
+            //println!("ERR: try_get_or_create_config_path: try_get_or_create_config_dir");
             return None
         };
         let Some(config_path) = Self::try_get_config_path_unchecked() else {
-            println!("ERR: try_get_or_create_config_path: try_get_config_path_unchecked");
+            //println!("ERR: try_get_or_create_config_path: try_get_config_path_unchecked");
             return None
         };
 
@@ -107,7 +107,7 @@ impl Config {
         .read(true)
         .open(&config_path)
         { 
-            println!("ERR: try_get_or_create_config_path: OpenOptions: {}", err);
+            //println!("ERR: try_get_or_create_config_path: OpenOptions: {}", err);
             return None
         };
         
@@ -122,11 +122,11 @@ impl Config {
     // }
     pub fn try_get_config_dir_unchecked() -> Option<PathBuf> {
         match Self::try_get_parent_dir().map(|dir|{
-            println!("INFO: try_get_config_dir_unchecked: dir: {}", dir.clone().to_string_lossy());
+            //println!("INFO: try_get_config_dir_unchecked: dir: {}", dir.clone().to_string_lossy());
             dir.join(".keybindmanager")
         }) {
             Some(dir) => {
-                println!("INFO: try_get_config_dir_unchecked: try_get_parent_dir: {}", dir.clone().into_os_string().to_string_lossy());
+                //println!("INFO: try_get_config_dir_unchecked: try_get_parent_dir: {}", dir.clone().into_os_string().to_string_lossy());
                 Some(dir)
             }
             _ => None,
@@ -134,13 +134,13 @@ impl Config {
     }
     pub fn try_get_config_dir() -> Option<PathBuf> {
         let Some(dir) = Self::try_get_config_dir_unchecked() else { 
-            println!("ERR: try_get_config_dir: try_get_config_dir_unchecked");
+            //println!("ERR: try_get_config_dir: try_get_config_dir_unchecked");
             return None 
         };
         match (dir.exists(), dir.is_dir()) {
             (true, true) => Some(dir),
             _ => {
-                println!("ERR: try_get_config_dir: (dir.exists(), dir.is_dir()) == ({},{})",dir.exists().to_string(), dir.is_dir().to_string());
+                //println!("ERR: try_get_config_dir: (dir.exists(), dir.is_dir()) == ({},{})",dir.exists().to_string(), dir.is_dir().to_string());
                 None
             },
         }
@@ -148,7 +148,7 @@ impl Config {
     pub fn try_get_config_path_unchecked() -> Option<PathBuf> {
         match Self::try_get_config_dir_unchecked().map(|dir| dir.join("config.txt")) {
             Some(path) => {
-                println!("INFO: try_get_config_path_unchecked: try_get_config_dir_unchecked: {}", path.clone().into_os_string().to_string_lossy());
+                //println!("INFO: try_get_config_path_unchecked: try_get_config_dir_unchecked: {}", path.clone().into_os_string().to_string_lossy());
                 Some(path)
             }
             _ => None,
