@@ -45,10 +45,9 @@ Currently i don't know of a way to get the username from this folder so trial an
    ```
 
 ## For the Future
-1. create user_last.xml incase the game reverts/changes keybinds and show restore prompt when mismatched with user.xml
-2. add search
-3. presets and preset sharing via code
-4. keyboard screen, visualised keyboard with tooltips showing what each key is bound to, recolor non-default binds
-5. implement localization using localization mappings (/controls/keyboard layout/)
-6. ???
-7. profit!
+1. presets and preset sharing via code
+2. keyboard screen, visualised keyboard with tooltips showing what each key is bound to, recolor non-default binds
+3. implement localization using localization mappings (/controls/keyboard layout/)
+4. add search
+5. ???
+6. profit!
