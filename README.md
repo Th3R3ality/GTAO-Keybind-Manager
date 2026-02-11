@@ -49,5 +49,6 @@ Currently i don't know of a way to get the username from this folder so trial an
 2. add search
 3. presets and preset sharing via code
 4. keyboard screen, visualised keyboard with tooltips showing what each key is bound to, recolor non-default binds
-5. ???
-6. profit!
+5. implement localization using localization mappings (/controls/keyboard layout/)
+6. ???
+7. profit!
