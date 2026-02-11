@@ -25,7 +25,7 @@ use crate::{
     },
 };
 
-pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 #[derive(Debug, Clone, Default)]
 pub struct State {
@@ -63,23 +63,27 @@ pub enum Message {
 impl State {
     pub fn new(profiles_folder: &PathBuf) -> State {
 
-        let input_items: Vec<String> = input::INPUT_CODES
-            .iter()
-            .flat_map(|input_category| 
-                input_category.iter()
-                    .enumerate()
-                    .filter(|(index, _)| index > &0).map(|(_, elem)| elem)
-                )
-            .map(|input_name| input_name.to_string())
-            .collect();
+        let input_combo_items: Vec<String> = input::INPUT_CODES
+        .iter()
+        .flat_map(|input_category| 
+            input_category.iter()
+            .enumerate()
+            .filter(|(index, _)| index > &0)
+            .map(|(_, elem)| elem.to_string())
+        )
+        .collect();
 
-        let source_items: Vec<String> = keycode::KEYCODES
-            .iter()
-            .map(|category| category.first().unwrap().0.to_string())
-            .collect();
+        let source_combo_items: Vec<String> = keycode::KEYCODES
+        .iter()
+        .map(|category| {
+            assert_ne!(category.len(), 0);
+            category.first().unwrap().0.to_string()
+        })
+        .collect();
+
         let mut new: State = State {
-            input_list_state_new_keybind: combo_box::State::new(input_items),
-            source_list_state_new_keybind: combo_box::State::new(source_items),
+            input_list_state_new_keybind: combo_box::State::new(input_combo_items),
+            source_list_state_new_keybind: combo_box::State::new(source_combo_items),
             ..Default::default()
         };
 
