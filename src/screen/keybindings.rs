@@ -57,6 +57,14 @@ const UNSAVED_BUTTON_TEXT_SIZE: f32 = 20.0;
 const UNSAVED_BUTTON_ICON_SIZE: f32 = 28.0;
 const UNSAVED_BUTTON_PADDING: f32 = 14.0;
 
+const MISMATCH_PROMPT_WIDTH: f32 = UNSAVED_PROMPT_WIDTH; //500.0;
+const MISMATCH_TITLE_SIZE: f32 = UNSAVED_TITLE_SIZE; //28.0;
+const MISMATCH_TITLE_PADDING: f32 = UNSAVED_TITLE_PADDING; //24.0;
+const MISMATCH_TITLE_GAP: f32 = UNSAVED_TITLE_GAP; //48.0;
+const MISMATCH_BUTTON_TEXT_SIZE: f32 = UNSAVED_BUTTON_TEXT_SIZE; //20.0;
+const MISMATCH_BUTTON_ICON_SIZE: f32 = UNSAVED_BUTTON_ICON_SIZE; //28.0;
+const MISMATCH_BUTTON_PADDING: f32 = UNSAVED_BUTTON_PADDING; //14.0;
+
 const NEWKEYBIND_PROMPT_WIDTH: f32 = 600.0;
 const NEWKEYBIND_BUTTON_ICON_SIZE: f32 = 36.0;
 const NEWKEYBIND_BUTTON_PADDING: f32 = 8.0;
@@ -64,10 +72,10 @@ const NEWKEYBIND_COMBO_PADDING: f32 = 12.0;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    ProfileSelected(String),
-    SaveChangesProfileSelected,
-    IgnoreChangesProfileSelected,
-    CancelProfileSelected,
+    SelectNewProfile(String),
+    SaveChangesToSelectedProfile,
+    IgnoreChangesToSelectedProfile,
+    CancelChangesToSelectedProfile,
     SaveSelectedProfile,
     Search(String),
     BeginNewKeybind,
@@ -76,7 +84,9 @@ pub enum Message {
     SelectNewKeybindKeycode(String),
     SaveNewKeybind,
     CancelNewKeybind,
-    DeleteKeybind(KeybindId)
+    DeleteKeybind(KeybindId),
+    MismatchRestore,
+    MismatchReload,
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct Keybindings {
@@ -96,7 +106,6 @@ impl Keybindings {
             }
         });
     }
-        
     fn load_selected_profile(state: &mut State) {
         let Some(selected_profile_name) = state.selected_profile_name.as_ref() else { return };
 
@@ -108,16 +117,24 @@ impl Keybindings {
 
         let mut profile = profile_ref.borrow_mut();
 
-        let res = profile.load_xml().err();
+        let res = profile.load().err();
         match res {
             Some(err) => println!("Error reading xml: {} | {}", err.0, err.1),
             None => state.selected_profile = Some(profile_ref.clone()),
         }
     }
 
+    pub fn verify_latest(state: &mut State){
+        let Some(profile_ref) = &state.selected_profile else { return };
+        let profile = profile_ref.borrow();
+        if !profile.verify_latest() {
+            state.prompt = Some(Prompt::ProfileMismatch(Self::view_prompt_profile_mismatch));
+        }
+    }
+
     pub fn update(state: &mut State, message: &Message) {
         match message {
-            Message::ProfileSelected(name) => {
+            Message::SelectNewProfile(name) => {
                 state.selected_profile_name = Some(name.clone());
 
                 if let Some(profile) = state.selected_profile.as_ref() {
@@ -128,16 +145,16 @@ impl Keybindings {
                 }
                 Self::load_selected_profile(state)
             },
-            Message::SaveChangesProfileSelected => {
+            Message::SaveChangesToSelectedProfile => {
                 state.prompt = None;
                 Self::save_selected_profile(state);
                 Self::load_selected_profile(state)
             },
-            Message::IgnoreChangesProfileSelected => {
+            Message::IgnoreChangesToSelectedProfile => {
                 state.prompt = None;
                 Self::load_selected_profile(state)
             },
-            Message::CancelProfileSelected => {
+            Message::CancelChangesToSelectedProfile => {
                 state.prompt = None
             }
             Message::SaveSelectedProfile => {
@@ -179,7 +196,7 @@ impl Keybindings {
                 
                 state.selected_profile.as_ref().map(|profile_ref| {
                     let mut profile = profile_ref.borrow_mut();
-                    let id = profile.new_id();
+                    let id = profile.next_id();
                     profile.add_keybind((input, source, keycode, id));
                 });
             }
@@ -190,6 +207,15 @@ impl Keybindings {
                 state.selected_profile.as_ref().map(|profile_ref| {
                     profile_ref.borrow_mut().remove_keybind(*id);
                 });
+            },
+            Message::MismatchRestore => {
+                state.prompt = None;
+                Self::save_selected_profile(state);
+            }
+            Message::MismatchReload => {
+                state.prompt = None;
+                Self::load_selected_profile(state);
+                Self::save_selected_profile(state);
             },
         }
     }
@@ -225,7 +251,7 @@ impl Keybindings {
                 pick_list(
                     available_profile_names,
                     selected_profile_name,
-                    Message::ProfileSelected
+                    Message::SelectNewProfile
                 )
                 .placeholder("none")
                 .text_size(HEADER_TEXT_SIZE)
@@ -359,21 +385,21 @@ impl Keybindings {
                         text("Save  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
                         icon(Icon::AddCircle).size(UNSAVED_BUTTON_ICON_SIZE).center()
                     ].align_y(iced::Center))
-                    .on_press(Message::SaveChangesProfileSelected)
+                    .on_press(Message::SaveChangesToSelectedProfile)
                     .style(button::success),
                     space().width(UNSAVED_BUTTON_PADDING),
                     button(row![
                         text("Ignore  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
                         icon(Icon::Block).size(UNSAVED_BUTTON_ICON_SIZE).center()
                     ].align_y(iced::Center))
-                    .on_press(Message::IgnoreChangesProfileSelected)
+                    .on_press(Message::IgnoreChangesToSelectedProfile)
                     .style(button::danger),
                     space().width(UNSAVED_BUTTON_PADDING),
                     button(row![
                         text("Cancel  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
                         icon(Icon::Cancel).size(UNSAVED_BUTTON_ICON_SIZE).center()
                     ].align_y(iced::Center))
-                    .on_press(Message::CancelProfileSelected)
+                    .on_press(Message::CancelChangesToSelectedProfile)
                     .style(button::warning),
                 ]).align_right(Length::Fill)
             ]).padding(UNSAVED_BUTTON_PADDING),
@@ -446,6 +472,42 @@ impl Keybindings {
         .style(container::bordered_box)
         .width(Length::Fixed(NEWKEYBIND_PROMPT_WIDTH))
         .into();
+        content.map(keybind_manager::Message::Keybindings)
+    }
+    pub fn view_prompt_profile_mismatch(_state: &State) -> Element<'_, keybind_manager::Message> {
+        let content: Element<'_, Message> =
+        container(column![
+            container(column![
+                text("Keybind Mismatch!").style(text::danger).size(MISMATCH_TITLE_SIZE).center(),
+                text("user.xml was modified since last save").style(text::secondary),
+                text("\"Restore\" will reapply your old keybinds").style(text::secondary),
+                text("\"Restore\" will load user.xml as is and save it as latest").style(text::secondary),
+            ].align_x(iced::Center)).padding(iced::padding::vertical(MISMATCH_TITLE_PADDING))
+            .center_x(Length::Fill),
+            space().height(MISMATCH_TITLE_GAP),
+            container(row![
+                container(row![
+                    button(row![
+                        text("Restore  ").size(MISMATCH_BUTTON_TEXT_SIZE).center(),
+                        icon(Icon::AddCircle).size(MISMATCH_BUTTON_ICON_SIZE).center()
+                    ].align_y(iced::Center))
+                    .on_press(Message::MismatchRestore)
+                    .style(button::success),
+                    space().width(MISMATCH_BUTTON_PADDING),
+                    button(row![
+                        text("Reload  ").size(MISMATCH_BUTTON_TEXT_SIZE).center(),
+                        icon(Icon::Block).size(MISMATCH_BUTTON_ICON_SIZE).center()
+                    ].align_y(iced::Center))
+                    .on_press(Message::MismatchReload)
+                    .style(button::danger),
+                    space().width(MISMATCH_BUTTON_PADDING),
+                ]).align_right(Length::Fill)
+            ]).padding(MISMATCH_BUTTON_PADDING),
+        ])
+        .style(container::bordered_box)
+        .width(Length::Fixed(MISMATCH_PROMPT_WIDTH))
+        .into();
+        
         content.map(keybind_manager::Message::Keybindings)
     }
 }

@@ -1,22 +1,8 @@
 use iced::{
-    Border,
-    Element,
-    color,
-    Task,
-    Theme,
-    window,
-    Length,
-    Background,
-    widget::{
-        opaque,
-        stack,
-        column,
-        container,
-        row,
-        button,
-        space,
-        text,
-    },
+    event,
+    Background, Border, Element, Length, Subscription, Task, Theme, color, widget::{
+        button, column, container, opaque, row, space, stack, text
+    }, window
 };
 
 use crate::{
@@ -36,10 +22,13 @@ pub const HEADER_HEIGHT: f32 = 75.0;
 
 pub const NAVIGATION_ICON_SIZE: f32 = 40.0;
 
+type PromptFn = fn(&State) -> Element<'_, Message>;
+
 #[derive(Debug, Clone)]
 pub enum Prompt{
-    UnsavedChanges(fn(&State) -> Element<'_, Message>),
-    NewKeybind( fn(&State) -> Element<'_, Message>),
+    ProfileMismatch(PromptFn),
+    UnsavedChanges(PromptFn),
+    NewKeybind(PromptFn),
 }
 
 pub fn run(state: State) -> iced::Result {
@@ -53,11 +42,16 @@ pub fn run(state: State) -> iced::Result {
         .theme(Theme::TokyoNight)
         .antialiasing(true)
         .font(asset::ICON_FONT_DATA)
+        .subscription(subscription)
         .run()
 }
 
 fn update(state: &mut State, message: Message) -> Task<Message> {
     match message {
+        Message::Ignore => (),
+        Message::Focused => {
+            Keybindings::verify_latest(state)
+        },
         Message::ScreenSelected(screen) => {
             if screen == state.screen {
                 state.screen = Screen::Landing;
@@ -125,6 +119,7 @@ fn view(state: &State) -> Element<'_, Message> {
     else {
         opaque(container(
             match state.prompt {
+                Some(Prompt::ProfileMismatch(fun)) => fun(state),
                 Some(Prompt::NewKeybind(fun)) => fun(state),
                 Some(Prompt::UnsavedChanges(fun)) => fun(state),
                 None => space().into(),
@@ -152,4 +147,11 @@ fn navigation_button(state: &State, icon: Icon, screen: Screen) -> Element<'stat
             ).style( if state.screen == screen { button::primary } else { button::background } )
             .on_press(Message::ScreenSelected(screen))
     ).into()
+}
+
+fn subscription(_state: &State) -> Subscription<Message> {
+    event::listen().map(|event| match event {
+        iced::Event::Window(window::Event::Focused) => Message::Focused,
+        _ => return Message::Ignore,
+    })
 }

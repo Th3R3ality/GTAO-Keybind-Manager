@@ -4,7 +4,7 @@ use std::{
     }, fs::{
         self,
         OpenOptions,
-    }, io::Write, path::{Path, PathBuf}, rc::Rc
+    }, io::Write, path::PathBuf, rc::Rc
 };
 
 use chrono::Local;
@@ -23,7 +23,10 @@ pub type KeybindBuilder = (Option<usize>, Option<usize>, Option<usize>);
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Profile {
     pub name: String,
+    pub filename: String,
     pub path: PathBuf,
+    pub parent_path: PathBuf,
+    pub latest_path: PathBuf,
     pub keybinds: Vec<Keybind>,
     pub id_counter: KeybindId,
     pub modified: bool,
@@ -42,9 +45,26 @@ const USER_ITEM: &str = "Item";
 
 impl Profile{
     pub fn new(name: String, xml_path: PathBuf) -> ProfileRef {
+
+        let filename = xml_path
+        .file_stem()
+        .unwrap()
+        .to_string_lossy()
+        .to_string();
+
+        let parent_path = xml_path
+        .parent()
+        .unwrap()
+        .to_owned();
+
+        let latest_path = parent_path.join("latest.xml");
+
         Rc::new(RefCell::new(Profile{
             name: name,
+            filename: filename,
             path: xml_path,
+            parent_path: parent_path,
+            latest_path: latest_path,
             ..Default::default()
         }))
     }
@@ -62,26 +82,19 @@ impl Profile{
     /// writes profile to file and marks it as p.modified = false on success
     pub fn write_xml(&mut self) -> std::result::Result<(), (String, String)> {
 
-        let parent = self.path.parent().unwrap_or(Path::new(""));
-        let filename = self.path
-            .file_stem()
-            .unwrap()
-            .to_string_lossy();
-
         let suffix = Local::now().format("_%d_%m_%y_%H%M").to_string();
 
         let mut counter = 0;
-        let mut backup_path = parent.join(format!("{filename}{suffix}")).with_extension("backup");
+        let mut backup_path = self.parent_path.join(format!("{}{suffix}", self.filename)).with_extension("backup");
         while backup_path.exists() {
             counter += 1;
-            backup_path = parent.join(format!("{filename}{suffix}__{counter}")).with_extension("backup");
+            backup_path = self.parent_path.join(format!("{}{suffix}__{counter}", self.filename)).with_extension("backup");
         }
 
         let res = fs::copy(&self.path, &backup_path);
         if let Err(err) = res {
             return Err((format!("couldn't backup profile: {}", self.name), err.to_string()))
         }
-
 
         let path = &self.path;
         let file = OpenOptions::new()
@@ -124,21 +137,53 @@ impl Profile{
                 let _ = file.write(format!("{}", closing(USER_WRAPPER)).as_bytes());
             },
         }
+
+        let res = fs::copy(&self.path, &self.latest_path);
+        if let Err(err) = res {
+            return Err((format!("couldn't create user_latest.xml: {}", self.name), err.to_string()))
+        }
         
         self.modified = false;
         Ok(())
     }
 
-    pub fn load_xml(&mut self) -> std::result::Result<(), (String, String)> {
-        
-        let res = fs::read_to_string(&self.path);
+    pub fn load(&mut self) -> std::result::Result<(), (String, String)> {
+
+        let res = Self::load_xml(&self.path);
+        match res {
+            Err(err) => return Err(err),
+            Ok(mut keybinds) => {
+                for keybind in &mut keybinds {
+                    if keybind.3 == 0 {
+                        keybind.3 = self.next_id();
+                    }
+                }
+                self.keybinds = keybinds;
+            }
+        }
+
+        self.modified = false;
+
+        Ok(())
+    }
+    pub fn verify_latest(&self) -> bool {
+        let Ok( mut current) = Self::load_xml( &self.path ) else { return true };
+        current.sort_by_key(|keybind| (keybind.0, keybind.1, keybind.2));
+
+        let Ok( mut latest) = Self::load_xml( &self.latest_path ) else { return true };
+        latest.sort_by_key(|keybind| (keybind.0, keybind.1, keybind.2));
+
+        latest == current
+    }
+    fn load_xml(path: &PathBuf) -> std::result::Result<Vec<Keybind>, (String, String)> {
+        let res = fs::read_to_string(path);
 
         let lines: Vec<String> = match res {
             Ok(string) => string.lines().map(String::from).collect(),
             Err(_) => return Err(("".to_owned(),"".to_owned())),
         };
 
-        let mut iter= lines.iter().enumerate();
+        let mut iter = lines.iter().enumerate();
         
         while let Some((_, line)) = iter.next() {
             if line.trim() == &opening(USER_MAPPINGS) {
@@ -220,7 +265,7 @@ impl Profile{
                 s if s.starts_with(&closing(USER_ITEM)) => {
                     match keybind_builder {
                         (Some(input), Some(category), Some(keycode)) => {
-                            keybind_collector.push((input, category, keycode, self.new_id()));
+                            keybind_collector.push((input, category, keycode, 0));
                         },
                         _ => {
                             return Err(("Incomplete Keybind".to_owned(), builder_to_string(keybind_builder_names)))
@@ -232,12 +277,10 @@ impl Profile{
             }
         }
 
-        self.keybinds = keybind_collector;
-        self.modified = false;
-        Ok(())
+        Ok(keybind_collector)
     }
 
-    pub fn new_id(&mut self) -> KeybindId {
+    pub fn next_id(&mut self) -> KeybindId {
         self.id_counter += 1;
         self.id_counter
     }

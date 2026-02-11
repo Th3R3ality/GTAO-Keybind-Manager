@@ -55,6 +55,8 @@ pub struct State {
 
 #[derive(Debug, Clone)]
 pub enum Message {
+    Ignore,
+    Focused,
     ScreenSelected(Screen),
     Keybindings(keybindings::Message),
     About(about::Message),
