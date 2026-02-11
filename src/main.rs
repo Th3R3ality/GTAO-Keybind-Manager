@@ -101,7 +101,7 @@ impl Config {
             return None
         };
 
-        if let Err(err) = fs::OpenOptions::new()
+        if let Err(_err) = fs::OpenOptions::new()
         .create(true)
         .write(true)
         .read(true)
