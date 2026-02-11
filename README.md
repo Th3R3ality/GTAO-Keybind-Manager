@@ -19,7 +19,7 @@
 <br>
 
 ## Useful information
-1. Currently i dont show the default keybinds so you will need to know how these keybinds will alter your ingame binds (tldr; if you bind a key it will have its default binds removed ((i think)), for default binds check /controls/default_binds.txt )
+1. Currently i dont show the default keybinds so you will need to know how these keybinds will alter your ingame binds `(tldr; if you bind a key it will have its default binds removed ((i think)), for default binds check /controls/default_binds.txt)`
 
 2. A profile refers to a rockstar games account so if you only have one there will probably only be one profile. <br>
 Currently i don't know of a way to get the username from this folder so trial and error if you have multiple :)
@@ -43,3 +43,12 @@ Currently i don't know of a way to get the username from this folder so trial an
    ```
    /Users/<user>/Library/Application Support/.keybindmanager/config.txt
    ```
+
+## For the Future
+1. create user_last.xml incase the game reverts/changes keybinds and show restore prompt when mismatched with user.xml
+2. add search
+3. presets and preset sharing via code
+4. keyboard screen, visualised keyboard with tooltips showing what each key is bound to, recolor non-default binds
+5. implement localization using localization mappings (/controls/keyboard layout/)
+6. ???
+7. profit!
