@@ -40,24 +40,24 @@ Info Screen <br>
 
 </details>
 
-# Useful information
+# Useful Information
 1. To reload keybinds without restarting your game open go to
     ``` Pause > Settings > Keybinds ```
    open the keybinds menu and back out of it
 > if you have "illegal" binds ( like unbinding all-chat ) accept the alert when backing out of the menu, it doesnt actually revert changes
 
-1. Currently i dont show the default keybinds so you will need to know how these keybinds will alter your ingame binds `(tldr; if you bind a key it will have its default binds removed ((i think)), for default binds check /controls/default_binds.txt)`
+2. Currently i dont show the default keybinds so you will need to know how these keybinds will alter your ingame binds `(tldr; if you bind a key it will have its default binds removed ((i think)), for default binds check /controls/default_binds.txt)`
 
-2. A profile refers to a rockstar games account so if you only have one there will probably only be one profile. <br>
+3. A profile refers to a rockstar games account so if you only have one there will probably only be one profile. <br>
 Currently i don't know of a way to get the username from this folder so trial and error if you have multiple :)
 
-3. Backups are automatically created every time you save a profile and are located at:
+4. Backups are automatically created every time you save a profile and are located at:
    ```
    Rockstar Games > GTA/Enhanced > Profiles > [profile] > Controls > user_[date].backup
    ```
    Currently the only way to restore it is to manually **rename** the backup to `user.xml`
 
-4. Config files are stored at: <br>
+5. Config files are stored at: <br>
    ### Windows
    ```
    C:\Users\<user>\AppData\Local\.keybindmanager\config.txt
