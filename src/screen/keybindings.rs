@@ -298,7 +298,7 @@ impl Keybindings {
 
         let mut keybinds_sorted = keybinds.clone();
         keybinds_sorted.sort_by_key(|keybind|
-            (keybind.1, keybind.0)
+            (input::from_index(keybind.0), keybind.2)
         );
         
         let keybind_list = column![].extend(
