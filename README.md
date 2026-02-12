@@ -41,23 +41,28 @@ Info Screen <br>
 </details>
 
 # Useful Information
+
+0. be sure to check out the wiki
+   
 1. To reload keybinds without restarting your game open go to
     ``` Pause > Settings > Keybinds ```
    open the keybinds menu and back out of it
 > if you have "illegal" binds ( like unbinding all-chat ) accept the alert when backing out of the menu, it doesnt actually revert changes
 
-2. Currently i dont show the default keybinds so you will need to know how these keybinds will alter your ingame binds `(tldr; if you bind a key it will have its default binds removed ((i think)), for default binds check /controls/default_binds.txt)`
+2. A neat trick you can do if you are wondering what a certain ingame keybinds input value is, is to go into the keybinds menu ingame and restore to default and only edit the thing you are trying to get, then exit the settings menu and open user.xml in your profiles folder ```( Rockstar Games > GTA/Enhanced > Profiles > [profile] > Controls > user.xml )```, it will only contain one keybind, remember or copy the input code and go into the keyboard manager, press restore, then add a new keybind with that value and save
 
-3. A profile refers to a rockstar games account so if you only have one there will probably only be one profile. <br>
+3. Currently i dont show the default keybinds so you will need to know how these keybinds will alter your ingame binds `(tldr; if you bind a key it will have its default binds removed ((i think)), for default binds check /controls/default_binds.txt)`
+
+4. A profile refers to a rockstar games account so if you only have one there will probably only be one profile. <br>
 Currently i don't know of a way to get the username from this folder so trial and error if you have multiple :)
 
-4. Backups are automatically created every time you save a profile and are located at:
+5. Backups are automatically created every time you save a profile and are located at:
    ```
    Rockstar Games > GTA/Enhanced > Profiles > [profile] > Controls > user_[date].backup
    ```
    Currently the only way to restore it is to manually **rename** the backup to `user.xml`
 
-5. Config files are stored at: <br>
+6. Config files are stored at: <br>
    ### Windows
    ```
    C:\Users\<user>\AppData\Local\.keybindmanager\config.txt
