@@ -1,12 +1,11 @@
-pub const CATEGORY: &'static str = &"CELLPHONE_MOVE";
-pub const CELLPHONE_UP: &'static str = &"INPUT_CELLPHONE_UP";
-pub const CELLPHONE_DOWN: &'static str = &"INPUT_CELLPHONE_DOWN";
-pub const CELLPHONE_LEFT: &'static str = &"INPUT_CELLPHONE_LEFT";
-pub const CELLPHONE_RIGHT: &'static str = &"INPUT_CELLPHONE_RIGHT";
+pub const CATEGORY: &'static(&'static str, &'static str, &'static str) = &("CELLPHONE_MOVE", "Cellphone Move", "Cellphone Move");
+pub const CELLPHONE_UP: &'static(&'static str, &'static str, &'static str) = &("INPUT_CELLPHONE_UP", "Cellphone Up", "Unknown");
+pub const CELLPHONE_DOWN: &'static(&'static str, &'static str, &'static str) = &("INPUT_CELLPHONE_DOWN", "Cellphone Down", "Unknown");
+pub const CELLPHONE_LEFT: &'static(&'static str, &'static str, &'static str) = &("INPUT_CELLPHONE_LEFT", "Cellphone Left", "Unknown");
+pub const CELLPHONE_RIGHT: &'static(&'static str, &'static str, &'static str) = &("INPUT_CELLPHONE_RIGHT", "Cellphone Right", "Unknown");
 
-pub const ALL: &'static[&'static str] = &[
+pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
 	CATEGORY, // CELLPHONE_MOVE
-	CELLPHONE_RIGHT,// INPUT_CELLPHONE_RIGHT
 	CELLPHONE_UP,// INPUT_CELLPHONE_UP
 	CELLPHONE_DOWN,// INPUT_CELLPHONE_DOWN
 	CELLPHONE_LEFT,// INPUT_CELLPHONE_LEFT

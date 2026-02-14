@@ -12,14 +12,9 @@ use chrono::Local;
 use crate::{
     input,
     keycode,
+    keybind::*,
 };
 
-pub type KeybindInput = usize;
-pub type KeybindSource = usize;
-pub type KeybindKeycode = usize;
-pub type KeybindId = usize;
-pub type Keybind = (KeybindInput, KeybindSource, KeybindKeycode, KeybindId);
-pub type KeybindBuilder = (Option<usize>, Option<usize>, Option<usize>);
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Profile {
     pub name: String,
@@ -75,7 +70,7 @@ impl Profile{
     }
 
     pub fn remove_keybind(&mut self, id: KeybindId) {
-        self.keybinds.retain(|keybind| keybind.3 != id);
+        self.keybinds.retain(|keybind| keybind.id != id);
         self.modified = true;
     }
 
@@ -113,20 +108,14 @@ impl Profile{
 
 
                 for keybind in &self.keybinds {
-                    let (input, category, keycode) = (
-                        input::from_index(keybind.0),
-                        keycode::category_from_index(keybind.1),
-                        keycode::keycode_from_indexes(keybind.1, keybind.2)
-                    );
-
                     let _ = file.write(format!("    {}\n", opening(USER_ITEM)).as_bytes());
                     let _ = file.write(format!("      {}{}{}\n",
-                        opening(USER_INPUT), input, closing(USER_INPUT)).as_bytes());
+                        opening(USER_INPUT), keybind.input.code.name, closing(USER_INPUT)).as_bytes());
                     let _ = file.write(format!("      {}{}{}\n",
-                        opening(USER_SOURCE), category.0, closing(USER_SOURCE)).as_bytes());
+                        opening(USER_SOURCE), keybind.key.source.name, closing(USER_SOURCE)).as_bytes());
                     let _ = file.write(format!("      {}\n", opening(USER_PARAMS)).as_bytes());       
                     let _ = file.write(format!("        {}{}{}\n",
-                        opening(USER_ITEM), keycode.0, closing(USER_ITEM)).as_bytes());
+                        opening(USER_ITEM), keybind.key.keycode.name, closing(USER_ITEM)).as_bytes());
                     let _ = file.write(format!("      {}\n", closing(USER_PARAMS)).as_bytes());       
                     
                     let _ = file.write(format!("    {}\n", closing(USER_ITEM)).as_bytes());       
@@ -153,8 +142,8 @@ impl Profile{
             Err(err) => return Err(err),
             Ok(mut keybinds) => {
                 for keybind in &mut keybinds {
-                    if keybind.3 == 0 {
-                        keybind.3 = self.next_id();
+                    if keybind.id == 0 {
+                        keybind.id = self.next_id();
                     }
                 }
                 self.keybinds = keybinds;
@@ -169,8 +158,8 @@ impl Profile{
             Err(err) => return Err(err),
             Ok(mut keybinds) => {
                 for keybind in &mut keybinds {
-                    if keybind.3 == 0 {
-                        keybind.3 = self.next_id();
+                    if keybind.id == 0 {
+                        keybind.id = self.next_id();
                     }
                 }
                 self.keybinds = keybinds;
@@ -181,10 +170,20 @@ impl Profile{
     }
     pub fn verify_latest(&self) -> bool {
         let Ok( mut current) = Self::load_xml( &self.path ) else { return true };
-        current.sort_by_key(|keybind| (keybind.0, keybind.1, keybind.2));
+        current.sort_by_key(|keybind| (
+            keybind.input.category.name,
+            keybind.input.code.name,
+            keybind.key.source.name,
+            keybind.key.keycode.name
+        ));
 
         let Ok( mut latest) = Self::load_xml( &self.latest_path ) else { return true };
-        latest.sort_by_key(|keybind| (keybind.0, keybind.1, keybind.2));
+        latest.sort_by_key(|keybind| (
+            keybind.input.category.name,
+            keybind.input.code.name,
+            keybind.key.source.name,
+            keybind.key.keycode.name
+        ));
 
         latest == current
     }
@@ -205,8 +204,7 @@ impl Profile{
         }
         
         let mut keybind_collector: Vec<Keybind> = Vec::new();
-        let mut keybind_builder: KeybindBuilder = (None, None, None);
-        let mut keybind_builder_names: (Option<String>, Option<String>, Option<String>) = (None, None, None);
+        let mut keybind_builder: KeybindBuilder = KeybindBuilder::default();
         while let Some((_, line)) = iter.next()
         {
             let trimmed = line.trim();
@@ -217,74 +215,63 @@ impl Profile{
             //println!("trimmed: {}", trimmed);
             match trimmed {
                 s if s.starts_with(&opening(USER_ITEM)) => {
-                    keybind_builder = (None, None, None);
-                    keybind_builder_names = (None, None, None);
+                    keybind_builder.empty();
                 },
                 s if s.starts_with(&opening(USER_INPUT)) => {
                     let Some(value) = extract_xml_value(trimmed, USER_INPUT) else {
-                        return Err((format!("None value while extracting '{}'", USER_INPUT), "".to_owned()))
-                    };
-                    keybind_builder.0 = match input::get_index(&value) {
-                        Some(index) => {
-                            keybind_builder_names.0 = Some(value);
-                            Some(index)
-                        },
-                        None => None,
+                        return Err(("load_xml:".to_owned(), format!("None value while extracting '{}'", USER_INPUT)))
                     };
 
+                    let Some(input) = input::get_indices(&value) else { 
+                        return Err(("load_xml:".to_owned(), format!("Couldn't find'{}'", value)))
+                    };
+                    keybind_builder.input_category = Some(input.category);
+                    keybind_builder.input_code = Some(input.code);
                 },
                 s if s.starts_with(&opening(USER_SOURCE)) => {
                     let Some(value) = extract_xml_value(trimmed, USER_SOURCE) else {
-                        return Err((format!("None value while extracting '{}'", USER_SOURCE), "".to_owned()))
+                        return Err(("load_xml:".to_owned(), format!("None value while extracting '{}'", USER_SOURCE)))
                     };
-                    keybind_builder.1 = match keycode::get_category_index(&value) {
-                        Some(index) => {
-                            keybind_builder_names.1 = Some(value);
-                            Some(index)
-                        },
-                        None => None,
-                    };
+                    keybind_builder.source = keycode::get_source(&value);
                 },
                 s if s.starts_with(&opening(USER_PARAMS)) => {
-                    match iter.next(){
-                        Some((_, item_line)) => {
-                            let Some(value) = extract_xml_value(item_line.trim(), USER_ITEM) else {
-                                return Err((format!("None value while extracting '{}'", USER_ITEM), "".to_owned()))
-                            };
+                    let Some((_, item_line)) = iter.next() else {
+                        return Err(("load_xml:".to_owned(), format!("Unexpected eof while reading '{}'", USER_ITEM)))
+                    };
 
-                            let category_index = match keybind_builder.1 {
-                                Some(category) => category,
-                                None => {
-                                    return Err(("Trying to get keycode without category".to_owned(), builder_to_string(keybind_builder_names)))
-                                }
-                            };
-                            keybind_builder.2 = match keycode::get_keycode_index_with_category_index(
-                                    category_index,
-                                    &value) {
-                                Some(index) => {
-                                    keybind_builder_names.2 = Some(value);
-                                    Some(index)
-                                },
-                                None => None,
-                            };
-                        },
-                        None => break,
-                    }
-                    match iter.next() {
-                        Some((_, params_end)) if params_end.trim() == &closing(USER_PARAMS) => (),
-                        None | _ => break,
+                    let Some(value) = extract_xml_value(item_line.trim(), USER_ITEM) else {
+                        return Err(("load_xml:".to_owned(), format!("None value while extracting '{}'", USER_ITEM)))
+                    };
+
+                    let Some(source) = keybind_builder.source.as_ref() else {
+                        return Err(("load_xml:".to_owned(), format!("Trying to get keycode without source '{:?}'", keybind_builder)))
+                    };
+
+                    keybind_builder.keycode = keycode::get_keycode(source, &value);
+
+                    let Some((_, closing_params_line)) = iter.next() else {
+                        return Err(("load_xml:".to_owned(), format!("Unexpected eof while expecting '{}'", &closing(USER_PARAMS))))
+                    };
+
+                    if closing_params_line.trim() != &closing(USER_PARAMS) {
+                        return Err(("load_xml:".to_owned(),
+                        format!("Expected '{}' but got '{}'", &closing(USER_PARAMS), closing_params_line.trim())))
                     }
                 },
                 s if s.starts_with(&closing(USER_ITEM)) => {
-                    match keybind_builder {
-                        (Some(input), Some(category), Some(keycode)) => {
-                            keybind_collector.push((input, category, keycode, 0));
-                        },
+                    match keybind_builder.clone().into() {
+                        (Some(input_category), Some(input_code), Some(source), Some(keycode)) => {
+                            keybind_collector.push(Keybind::new_from_primitives(
+                                input_category,
+                                input_code,
+                                source,
+                                keycode,
+                                0));
+                        }
                         _ => {
-                            return Err(("Incomplete Keybind".to_owned(), builder_to_string(keybind_builder_names)))
+                            return Err(("load_xml:".to_owned(), format!("keybind_builder incomplete {:?}", keybind_builder)));
                         },
-                    }
-                    keybind_builder = (None, None, None);
+                    };
                 },
                 _ => break,
             }
@@ -322,19 +309,19 @@ fn extract_xml_value(enclosed_value: &str, tag: &str) -> Option<String> {
     }
 }
 
-fn builder_to_string<T: ToString>(builder: (Option<T>, Option<T>, Option<T>)) -> String {
-    let input_string = match builder.0 {
-        Some(input) => input.to_string(),
-        None => "None".to_owned(),
-    };
-    let category_string = match builder.1 {
-        Some(category) => category.to_string(),
-        None => "None".to_owned(),
-    };
-    let keycode_string = match builder.2 {
-        Some(keycode) => keycode.to_string(),
-        None => "None".to_owned(),
-    };
+// fn builder_to_string<T: ToString>(builder: (Option<T>, Option<T>, Option<T>)) -> String {
+//     let input_string = match builder.0 {
+//         Some(input) => input.to_string(),
+//         None => "None".to_owned(),
+//     };
+//     let category_string = match builder.1 {
+//         Some(category) => category.to_string(),
+//         None => "None".to_owned(),
+//     };
+//     let keycode_string = match builder.2 {
+//         Some(keycode) => keycode.to_string(),
+//         None => "None".to_owned(),
+//     };
 
-    return format!("builder: {} {} {}", input_string, category_string, keycode_string)
-}
+//     return format!("builder: {} {} {}", input_string, category_string, keycode_string)
+// }

@@ -1,3 +1,5 @@
+use crate::keybind::*;
+
 pub mod cellphone_camera;
 pub mod cellphone_misc;
 pub mod cellphone_move;
@@ -33,7 +35,7 @@ pub mod vehicle_ground;
 pub mod vehicle_sub;
 
 pub const INPUT_ERR_CODE: &'static str = &"???_INPUT_???";
-pub const INPUT_CODES: &'static[&'static[&'static str]] = &[
+pub const INPUT_CODES: &'static[&'static[&'static (&'static str, &'static str, &'static str)]] = &[
     cellphone_camera::ALL,
     cellphone_misc::ALL,
     cellphone_move::ALL,
@@ -69,20 +71,69 @@ pub const INPUT_CODES: &'static[&'static[&'static str]] = &[
     vehicle_sub::ALL,
 ];
 
-pub fn get_index(input_code: &str) -> Option<usize> {
-    return match INPUT_CODES.iter()
-        .flat_map(|x| x.iter())
-        .enumerate()
-        .find(|x| x.1 == &input_code) {
-            Some((index, _)) => Some(index),
-            _ => None,
-        }
-}
-pub fn from_index(index: usize) -> &'static str {
-    return INPUT_CODES
+pub fn get_indices(input_code: &str) -> Option<KeybindInput> {
+    INPUT_CODES
+    .iter()
+    .enumerate()
+    .find_map(|(category_index, category)| {
+        category
         .iter()
-        .flat_map(|x| x.iter())
-        .copied()
-        .nth(index)
-        .unwrap_or(INPUT_ERR_CODE);
+        .enumerate()
+        .find_map(|(code_index, code)|{
+            if code.0 == input_code {
+                let first = category.first()?;
+                Some(KeybindInput {
+                    category: KeybindThing {
+                        index: category_index,
+                        name: first.0,
+                        pretty_name: first.1,
+                        desc: first.2,
+                    },
+                    code: KeybindThing {
+                        index: code_index,
+                        name: code.0,
+                        pretty_name: code.1,
+                        desc: code.2,
+                    }
+                })
+            }
+            else {
+                None
+            }
+        })
+    })
+}
+
+pub fn get_all_categories() -> Vec<KeybindInputCategory> {
+    INPUT_CODES
+    .iter()
+    .enumerate()
+    .map(|(source_index, source)| {
+        let first = source.first().unwrap();
+        KeybindInputCategory {
+            index: source_index,
+            name: first.0,
+            pretty_name: first.1,
+            desc: first.2,
+        }
+    })
+    .collect()
+}
+
+pub fn get_all_input_codes_for_category(category: &KeybindInputCategory) -> Vec<KeybindInputCode> {
+    INPUT_CODES
+    .get(category.index)
+    .unwrap()
+    .iter()
+    .enumerate()
+    .filter_map(|(index, input_code)|{
+        if index == 0 { return None }
+        Some(KeybindInputCode {
+            index,
+            name: input_code.0,
+            pretty_name: input_code.1,
+            desc: input_code.2,
+        })
+    })
+    .collect()
 }

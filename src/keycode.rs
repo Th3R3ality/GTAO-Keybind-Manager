@@ -2,6 +2,8 @@
 //pub const NULL: &'static(&'static str,&'static str,&'static str) = &("KEY_NULL", "Null", "Unbound");
 // KEY_NULL is appended to every category (it may only work/is used with "keyboard")
 
+use crate::keybind::*;
+
 pub mod keyboard;
 pub mod mouse_button;
 pub mod mouse_wheel;
@@ -15,63 +17,81 @@ pub const KEYCODES: &[&[&(&str,&str,&str)]] = &[
 pub const KEYCODE_ERR_KEY: &'static (&'static str, &'static str, &'static str) = &(&"???_ERR_KEY",&"??_ERR_KEY",&"???_ERR_KEY");
 pub const KEYCODE_ERR_CATEGORY: &'static (&'static str, &'static str, &'static str) = &(&"???_ERR_CATEGORY",&"??_ERR_CATEGORY",&"???_ERR_CATEGORY");
 
-pub fn category_from_index(index: usize) -> &'static (&'static str,&'static str,&'static str) {
-    if let Some(category) = KEYCODES.iter().nth(index) {
-        return category.iter()
-            .next()
-            .copied()
-            .unwrap_or(KEYCODE_ERR_CATEGORY)
-    }
-    return KEYCODE_ERR_CATEGORY
-}
-pub fn get_category_index(category_name: &str) -> Option<usize> {
-    for (category_index, category) in KEYCODES.iter().enumerate() {
-        if let Some(value) = category.iter().next() {
-            if value.0 != category_name {
-                continue;
-            };
-            return Some(category_index)
-        };
-    }
-    return None
-}
+//type NameTuple = &'static (&'static str,&'static str,&'static str);
 
-pub fn keycode_from_indexes(category_index: usize, keycode_index: usize)
-        -> &'static (&'static str, &'static str, &'static str) {
-    if let Some(category) = KEYCODES.iter().nth(category_index) {
-        return category.iter()
-            .nth(keycode_index)
-            .copied()
-            .unwrap_or(KEYCODE_ERR_KEY)
-    }
-
-    return KEYCODE_ERR_KEY
-}
-
-pub fn get_keycode_index_with_category_index(category_index: usize, keycode_name: &str) -> Option<usize> {
-    if let Some(category) = KEYCODES.iter().nth(category_index) {
-        for (index, keycode) in category.iter().enumerate() {
-            if keycode.0 == keycode_name{
-                return Some(index)
-            }
+pub fn get_source(category_name: &str) -> Option<KeybindSource> {
+    KEYCODES
+    .iter()
+    .enumerate()
+    .find_map(|(index, category)|{
+        if category.first()?.0 == category_name {
+            let first = category.first()?;
+            Some(KeybindSource {
+                index,
+                name: first.0,
+                pretty_name: first.1,
+                desc: first.2,
+            })
         }
-    }
-    return None
+        else {
+            None
+        }
+    })
 }
 
-pub fn get_keycode_index_with_category(category_name: &str, keycode_name: &str) -> Option<usize> {
-    for category in KEYCODES.iter() {
-        if let Some(value) = category.iter().next() {
-            if value.0 != category_name {
-                continue;
-            };
-            for (keycode_index, keycode) in category.iter().enumerate(){
-                if keycode.0 != keycode_name {
-                    continue;
-                };
-                return Some(keycode_index)
+pub fn get_keycode(source: &KeybindSource, keycode_name: &str) -> Option<KeybindKeycode> {
+    KEYCODES
+    .get(source.index)
+    .and_then(|category|{
+        category
+        .iter()
+        .enumerate()
+        .find_map(|(index, keycode)|{
+            if keycode.0 == keycode_name {
+                Some(KeybindKeycode {
+                    index,
+                    name: keycode.0,
+                    pretty_name: keycode.1,
+                    desc: keycode.2,
+                })
             }
-        };
-    }
-    return None
+            else {
+                None
+            }
+        })
+    })
+}
+
+pub fn get_all_sources() -> Vec<KeybindSource> {
+    KEYCODES
+    .iter()
+    .enumerate()
+    .map(|(index, source)| {
+        let first = source.first().unwrap();
+        KeybindSource {
+            index,
+            name: first.0,
+            pretty_name: first.1,
+            desc: first.2,
+        }
+    })
+    .collect()
+}
+
+pub fn get_all_keycodes_for_source(source: &KeybindSource) -> Vec<KeybindKeycode> {
+    KEYCODES
+    .get(source.index)
+    .unwrap()
+    .iter()
+    .enumerate()
+    .filter_map(|(index, keycode)|{
+        if index == 0 { return None }
+        Some(KeybindKeycode {
+            index,
+            name: keycode.0,
+            pretty_name: keycode.1,
+            desc: keycode.2,
+        })
+    })
+    .collect()
 }

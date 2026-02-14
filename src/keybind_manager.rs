@@ -16,10 +16,10 @@ use crate::{
         about,
     },
     profile::{
-        KeybindBuilder,
         ProfileRef,
         Profile,
     },
+    keybind::*,
     gui::{
         Prompt,
     },
@@ -33,6 +33,11 @@ pub struct State {
     pub screen: Screen,
     pub prompt: Option<Prompt>,
 
+    pub input_categories: Vec<KeybindInputCategory>,
+    pub input_codes: Vec<Vec<KeybindInputCode>>,
+    pub key_sources: Vec<KeybindSource>,
+    pub keycodes: Vec<Vec<KeybindKeycode>>,
+
     // keybindings screen
     pub available_profiles: Vec<ProfileRef>,
     pub selected_profile: Option<ProfileRef>,
@@ -40,16 +45,12 @@ pub struct State {
     pub search_string: String,
     
     // // new keybind prompt
-    pub dummy_new_keybind: KeybindBuilder,
+    pub new_keybind_builder: KeybindBuilder,
 
-    pub input_list_state_new_keybind: combo_box::State<String>,
-    pub selected_input_new_keybind: Option<String>,
-
-    pub source_list_state_new_keybind: combo_box::State<String>,
-    pub selected_source_new_keybind: Option<String>,
-
-    pub keycode_list_state_new_keybind: combo_box::State<String>,
-    pub selected_keycode_new_keybind: Option<String>,
+    pub new_keybind_input_category_list_state: combo_box::State<KeybindInputCategory>,
+    pub new_keybind_input_code_list_state: combo_box::State<KeybindInputCode>,
+    pub new_keybind_source_list_state: combo_box::State<KeybindSource>,
+    pub new_keybind_keycode_list_state: combo_box::State<KeybindKeycode>,
 
 }
 
@@ -64,30 +65,27 @@ pub enum Message {
 
 impl State {
     pub fn new(profiles_folder: &PathBuf) -> State {
-
-        let input_combo_items: Vec<String> = input::INPUT_CODES
-        .iter()
-        .flat_map(|input_category| 
-            input_category.iter()
-            .enumerate()
-            .filter(|(index, _)| index > &0)
-            .map(|(_, elem)| elem.to_string())
-        )
-        .collect();
-
-        let source_combo_items: Vec<String> = keycode::KEYCODES
-        .iter()
-        .map(|category| {
-            assert_ne!(category.len(), 0);
-            category.first().unwrap().0.to_string()
-        })
-        .collect();
-
+    
         let mut new: State = State {
-            input_list_state_new_keybind: combo_box::State::new(input_combo_items),
-            source_list_state_new_keybind: combo_box::State::new(source_combo_items),
+            input_categories: input::get_all_categories(),
+            key_sources: keycode::get_all_sources(),
             ..Default::default()
         };
+
+        for (index, category) in new.input_categories.iter().enumerate() {
+            assert_eq!(index, category.index);
+            assert_eq!(index, new.input_codes.len());
+            new.input_codes.push(input::get_all_input_codes_for_category(category));
+        }
+
+        for (index, source) in new.key_sources.iter().enumerate() {
+            assert_eq!(index, source.index);
+            assert_eq!(index, new.keycodes.len());
+            new.keycodes.push(keycode::get_all_keycodes_for_source(source));
+        }
+
+        new.new_keybind_input_category_list_state = combo_box::State::new(new.input_categories.clone());
+        new.new_keybind_source_list_state = combo_box::State::new(new.key_sources.clone());
 
         let _ = new.discover_profiles(profiles_folder);
 

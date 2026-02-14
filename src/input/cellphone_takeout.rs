@@ -1,8 +1,7 @@
-pub const CATEGORY: &'static str = &"CELLPHONE_TAKEOUT";
-pub const PHONE: &'static str = &"INPUT_PHONE";
+pub const CATEGORY: &'static(&'static str, &'static str, &'static str) = &("CELLPHONE_TAKEOUT", "Cellphone Takeout", "Cellphone Takeout");
+pub const PHONE: &'static(&'static str, &'static str, &'static str) = &("INPUT_PHONE", "Phone", "Unknown");
 
-pub const ALL: &'static[&'static str] = &[
+pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
 	CATEGORY, // CELLPHONE_TAKEOUT
-	PHONE,// INPUT_PHONE
 	PHONE,// INPUT_PHONE
 ];

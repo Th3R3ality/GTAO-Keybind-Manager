@@ -1,20 +1,19 @@
-pub const CATEGORY: &'static str = &"GENERAL";
-pub const HUD_SPECIAL: &'static str = &"INPUT_HUD_SPECIAL";
-pub const SPECIAL_ABILITY_PC: &'static str = &"INPUT_SPECIAL_ABILITY_PC";
-pub const CHARACTER_WHEEL: &'static str = &"INPUT_CHARACTER_WHEEL";
-pub const SELECT_CHARACTER_MICHAEL: &'static str = &"INPUT_SELECT_CHARACTER_MICHAEL";
-pub const SELECT_CHARACTER_FRANKLIN: &'static str = &"INPUT_SELECT_CHARACTER_FRANKLIN";
-pub const SELECT_CHARACTER_TREVOR: &'static str = &"INPUT_SELECT_CHARACTER_TREVOR";
-pub const SELECT_CHARACTER_MULTIPLAYER: &'static str = &"INPUT_SELECT_CHARACTER_MULTIPLAYER";
-pub const INTERACTION_MENU: &'static str = &"INPUT_INTERACTION_MENU";
-pub const REPLAY_START_STOP_RECORDING: &'static str = &"INPUT_REPLAY_START_STOP_RECORDING";
-pub const REPLAY_START_STOP_RECORDING_SECONDARY: &'static str = &"INPUT_REPLAY_START_STOP_RECORDING_SECONDARY";
-pub const SAVE_REPLAY_CLIP: &'static str = &"INPUT_SAVE_REPLAY_CLIP";
-pub const FRONTEND_SOCIAL_CLUB_SECONDARY: &'static str = &"INPUT_FRONTEND_SOCIAL_CLUB_SECONDARY";
+pub const CATEGORY: &'static(&'static str, &'static str, &'static str) = &("GENERAL", "General", "General");
+pub const HUD_SPECIAL: &'static(&'static str, &'static str, &'static str) = &("INPUT_HUD_SPECIAL", "Hud Special", "Unknown");
+pub const SPECIAL_ABILITY_PC: &'static(&'static str, &'static str, &'static str) = &("INPUT_SPECIAL_ABILITY_PC", "Special Ability Pc", "Unknown");
+pub const CHARACTER_WHEEL: &'static(&'static str, &'static str, &'static str) = &("INPUT_CHARACTER_WHEEL", "Character Wheel", "Unknown");
+pub const SELECT_CHARACTER_MICHAEL: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_CHARACTER_MICHAEL", "Select Character Michael", "Unknown");
+pub const SELECT_CHARACTER_FRANKLIN: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_CHARACTER_FRANKLIN", "Select Character Franklin", "Unknown");
+pub const SELECT_CHARACTER_TREVOR: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_CHARACTER_TREVOR", "Select Character Trevor", "Unknown");
+pub const SELECT_CHARACTER_MULTIPLAYER: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_CHARACTER_MULTIPLAYER", "Select Character Multiplayer", "Unknown");
+pub const INTERACTION_MENU: &'static(&'static str, &'static str, &'static str) = &("INPUT_INTERACTION_MENU", "Interaction Menu", "Unknown");
+pub const REPLAY_START_STOP_RECORDING: &'static(&'static str, &'static str, &'static str) = &("INPUT_REPLAY_START_STOP_RECORDING", "Replay Start Stop Recording", "Unknown");
+pub const REPLAY_START_STOP_RECORDING_SECONDARY: &'static(&'static str, &'static str, &'static str) = &("INPUT_REPLAY_START_STOP_RECORDING_SECONDARY", "Replay Start Stop Recording Secondary", "Unknown");
+pub const SAVE_REPLAY_CLIP: &'static(&'static str, &'static str, &'static str) = &("INPUT_SAVE_REPLAY_CLIP", "Save Replay Clip", "Unknown");
+pub const FRONTEND_SOCIAL_CLUB_SECONDARY: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_SOCIAL_CLUB_SECONDARY", "Frontend Social Club Secondary", "Unknown");
 
-pub const ALL: &'static[&'static str] = &[
+pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
 	CATEGORY, // GENERAL
-	FRONTEND_SOCIAL_CLUB_SECONDARY,// INPUT_FRONTEND_SOCIAL_CLUB_SECONDARY
 	HUD_SPECIAL,// INPUT_HUD_SPECIAL
 	SPECIAL_ABILITY_PC,// INPUT_SPECIAL_ABILITY_PC
 	CHARACTER_WHEEL,// INPUT_CHARACTER_WHEEL

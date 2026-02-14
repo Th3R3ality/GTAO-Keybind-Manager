@@ -1,21 +1,20 @@
-pub const CATEGORY: &'static str = &"ON_FOOT_WEAPON_SELECT";
-pub const SELECT_NEXT_WEAPON: &'static str = &"INPUT_SELECT_NEXT_WEAPON";
-pub const SELECT_PREV_WEAPON: &'static str = &"INPUT_SELECT_PREV_WEAPON";
-pub const WEAPON_WHEEL_NEXT: &'static str = &"INPUT_WEAPON_WHEEL_NEXT";
-pub const WEAPON_WHEEL_PREV: &'static str = &"INPUT_WEAPON_WHEEL_PREV";
-pub const SELECT_WEAPON_UNARMED: &'static str = &"INPUT_SELECT_WEAPON_UNARMED";
-pub const SELECT_WEAPON_MELEE: &'static str = &"INPUT_SELECT_WEAPON_MELEE";
-pub const SELECT_WEAPON_SHOTGUN: &'static str = &"INPUT_SELECT_WEAPON_SHOTGUN";
-pub const SELECT_WEAPON_HEAVY: &'static str = &"INPUT_SELECT_WEAPON_HEAVY";
-pub const SELECT_WEAPON_SPECIAL: &'static str = &"INPUT_SELECT_WEAPON_SPECIAL";
-pub const SELECT_WEAPON_HANDGUN: &'static str = &"INPUT_SELECT_WEAPON_HANDGUN";
-pub const SELECT_WEAPON_SMG: &'static str = &"INPUT_SELECT_WEAPON_SMG";
-pub const SELECT_WEAPON_AUTO_RIFLE: &'static str = &"INPUT_SELECT_WEAPON_AUTO_RIFLE";
-pub const SELECT_WEAPON_SNIPER: &'static str = &"INPUT_SELECT_WEAPON_SNIPER";
+pub const CATEGORY: &'static(&'static str, &'static str, &'static str) = &("ON_FOOT_WEAPON_SELECT", "On Foot Weapon Select", "On Foot Weapon Select");
+pub const SELECT_NEXT_WEAPON: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_NEXT_WEAPON", "Select Next Weapon", "Unknown");
+pub const SELECT_PREV_WEAPON: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_PREV_WEAPON", "Select Prev Weapon", "Unknown");
+pub const WEAPON_WHEEL_NEXT: &'static(&'static str, &'static str, &'static str) = &("INPUT_WEAPON_WHEEL_NEXT", "Weapon Wheel Next", "Unknown");
+pub const WEAPON_WHEEL_PREV: &'static(&'static str, &'static str, &'static str) = &("INPUT_WEAPON_WHEEL_PREV", "Weapon Wheel Prev", "Unknown");
+pub const SELECT_WEAPON_UNARMED: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_WEAPON_UNARMED", "Select Weapon Unarmed", "Unknown");
+pub const SELECT_WEAPON_MELEE: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_WEAPON_MELEE", "Select Weapon Melee", "Unknown");
+pub const SELECT_WEAPON_SHOTGUN: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_WEAPON_SHOTGUN", "Select Weapon Shotgun", "Unknown");
+pub const SELECT_WEAPON_HEAVY: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_WEAPON_HEAVY", "Select Weapon Heavy", "Unknown");
+pub const SELECT_WEAPON_SPECIAL: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_WEAPON_SPECIAL", "Select Weapon Special", "Unknown");
+pub const SELECT_WEAPON_HANDGUN: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_WEAPON_HANDGUN", "Select Weapon Handgun", "Unknown");
+pub const SELECT_WEAPON_SMG: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_WEAPON_SMG", "Select Weapon Smg", "Unknown");
+pub const SELECT_WEAPON_AUTO_RIFLE: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_WEAPON_AUTO_RIFLE", "Select Weapon Auto Rifle", "Unknown");
+pub const SELECT_WEAPON_SNIPER: &'static(&'static str, &'static str, &'static str) = &("INPUT_SELECT_WEAPON_SNIPER", "Select Weapon Sniper", "Unknown");
 
-pub const ALL: &'static[&'static str] = &[
+pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
 	CATEGORY, // ON_FOOT_WEAPON_SELECT
-	SELECT_WEAPON_SNIPER,// INPUT_SELECT_WEAPON_SNIPER
 	SELECT_NEXT_WEAPON,// INPUT_SELECT_NEXT_WEAPON
 	SELECT_PREV_WEAPON,// INPUT_SELECT_PREV_WEAPON
 	WEAPON_WHEEL_NEXT,// INPUT_WEAPON_WHEEL_NEXT

@@ -1,33 +1,32 @@
-pub const CATEGORY: &'static str = &"FRONTEND";
-pub const FRONTEND_DOWN: &'static str = &"INPUT_FRONTEND_DOWN";
-pub const FRONTEND_UP: &'static str = &"INPUT_FRONTEND_UP";
-pub const FRONTEND_LEFT: &'static str = &"INPUT_FRONTEND_LEFT";
-pub const FRONTEND_RIGHT: &'static str = &"INPUT_FRONTEND_RIGHT";
-pub const FRONTEND_RDOWN: &'static str = &"INPUT_FRONTEND_RDOWN";
-pub const FRONTEND_RUP: &'static str = &"INPUT_FRONTEND_RUP";
-pub const FRONTEND_RLEFT: &'static str = &"INPUT_FRONTEND_RLEFT";
-pub const FRONTEND_RRIGHT: &'static str = &"INPUT_FRONTEND_RRIGHT";
-pub const FRONTEND_AXIS_X: &'static str = &"INPUT_FRONTEND_AXIS_X";
-pub const FRONTEND_AXIS_Y: &'static str = &"INPUT_FRONTEND_AXIS_Y";
-pub const FRONTEND_RIGHT_AXIS_X: &'static str = &"INPUT_FRONTEND_RIGHT_AXIS_X";
-pub const FRONTEND_RIGHT_AXIS_Y: &'static str = &"INPUT_FRONTEND_RIGHT_AXIS_Y";
-pub const FRONTEND_ACCEPT: &'static str = &"INPUT_FRONTEND_ACCEPT";
-pub const FRONTEND_CANCEL: &'static str = &"INPUT_FRONTEND_CANCEL";
-pub const FRONTEND_X: &'static str = &"INPUT_FRONTEND_X";
-pub const FRONTEND_Y: &'static str = &"INPUT_FRONTEND_Y";
-pub const FRONTEND_LB: &'static str = &"INPUT_FRONTEND_LB";
-pub const FRONTEND_RB: &'static str = &"INPUT_FRONTEND_RB";
-pub const FRONTEND_LT: &'static str = &"INPUT_FRONTEND_LT";
-pub const FRONTEND_RT: &'static str = &"INPUT_FRONTEND_RT";
-pub const FRONTEND_LS: &'static str = &"INPUT_FRONTEND_LS";
-pub const FRONTEND_RS: &'static str = &"INPUT_FRONTEND_RS";
-pub const FRONTEND_LEADERBOARD: &'static str = &"INPUT_FRONTEND_LEADERBOARD";
-pub const FRONTEND_SELECT: &'static str = &"INPUT_FRONTEND_SELECT";
-pub const FRONTEND_DELETE: &'static str = &"INPUT_FRONTEND_DELETE";
+pub const CATEGORY: &'static(&'static str, &'static str, &'static str) = &("FRONTEND", "Frontend", "Frontend");
+pub const FRONTEND_DOWN: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_DOWN", "Frontend Down", "Unknown");
+pub const FRONTEND_UP: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_UP", "Frontend Up", "Unknown");
+pub const FRONTEND_LEFT: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_LEFT", "Frontend Left", "Unknown");
+pub const FRONTEND_RIGHT: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_RIGHT", "Frontend Right", "Unknown");
+pub const FRONTEND_RDOWN: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_RDOWN", "Frontend Rdown", "Unknown");
+pub const FRONTEND_RUP: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_RUP", "Frontend Rup", "Unknown");
+pub const FRONTEND_RLEFT: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_RLEFT", "Frontend Rleft", "Unknown");
+pub const FRONTEND_RRIGHT: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_RRIGHT", "Frontend Rright", "Unknown");
+pub const FRONTEND_AXIS_X: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_AXIS_X", "Frontend Axis X", "Unknown");
+pub const FRONTEND_AXIS_Y: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_AXIS_Y", "Frontend Axis Y", "Unknown");
+pub const FRONTEND_RIGHT_AXIS_X: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_RIGHT_AXIS_X", "Frontend Right Axis X", "Unknown");
+pub const FRONTEND_RIGHT_AXIS_Y: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_RIGHT_AXIS_Y", "Frontend Right Axis Y", "Unknown");
+pub const FRONTEND_ACCEPT: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_ACCEPT", "Frontend Accept", "Unknown");
+pub const FRONTEND_CANCEL: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_CANCEL", "Frontend Cancel", "Unknown");
+pub const FRONTEND_X: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_X", "Frontend X", "Unknown");
+pub const FRONTEND_Y: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_Y", "Frontend Y", "Unknown");
+pub const FRONTEND_LB: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_LB", "Frontend Lb", "Unknown");
+pub const FRONTEND_RB: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_RB", "Frontend Rb", "Unknown");
+pub const FRONTEND_LT: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_LT", "Frontend Lt", "Unknown");
+pub const FRONTEND_RT: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_RT", "Frontend Rt", "Unknown");
+pub const FRONTEND_LS: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_LS", "Frontend Ls", "Unknown");
+pub const FRONTEND_RS: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_RS", "Frontend Rs", "Unknown");
+pub const FRONTEND_LEADERBOARD: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_LEADERBOARD", "Frontend Leaderboard", "Unknown");
+pub const FRONTEND_SELECT: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_SELECT", "Frontend Select", "Unknown");
+pub const FRONTEND_DELETE: &'static(&'static str, &'static str, &'static str) = &("INPUT_FRONTEND_DELETE", "Frontend Delete", "Unknown");
 
-pub const ALL: &'static[&'static str] = &[
+pub const ALL: &'static[&'static(&'static str, &'static str, &'static str)] = &[
 	CATEGORY, // FRONTEND
-	FRONTEND_DELETE,// INPUT_FRONTEND_DELETE
 	FRONTEND_DOWN,// INPUT_FRONTEND_DOWN
 	FRONTEND_UP,// INPUT_FRONTEND_UP
 	FRONTEND_LEFT,// INPUT_FRONTEND_LEFT

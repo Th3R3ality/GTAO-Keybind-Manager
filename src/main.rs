@@ -6,6 +6,7 @@ pub mod screen;
 pub mod asset;
 pub mod profile;
 pub mod styling;
+pub mod keybind;
 
 use std::{
     fs,
