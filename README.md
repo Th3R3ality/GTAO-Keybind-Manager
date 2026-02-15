@@ -29,6 +29,9 @@ Keybinding Page <br>
 New Keybind <br>
 ![](/assets/ss/new_keybind.png)
 
+Modify Keybind <br>
+![](/assets/ss/modify_keybind.png)
+
 Unsaved Changes <br>
 ![](/assets/ss/unsaved_changes.png)
 
