@@ -87,10 +87,9 @@ Currently i don't know of a way to get the username from this folder so trial an
 5. add search
 6. on windows, make the icon show on the executable
 7. make a button to easily pick and load from a .backup file
-8. show diff when mismatch is detected
-9. add keyboard navigation
-10. ???
-11. profit!
+8. add keyboard navigation
+9. ???
+10. profit!
 
 # Credits
 
