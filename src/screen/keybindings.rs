@@ -66,22 +66,35 @@ const NEWKEYBIND_BUTTON_ICON_SIZE: f32 = 36.0;
 const NEWKEYBIND_BUTTON_PADDING: f32 = 8.0;
 const NEWKEYBIND_COMBO_PADDING: f32 = 12.0;
 
+#[derive(Debug, Clone, Default)]
+pub enum EditorMode {
+#[default]
+    Adding,
+    Modifying(KeybindId),
+}
+
 #[derive(Debug, Clone)]
 pub enum Message {
-    SelectNewProfile(String),
-    SaveChangesToSelectedProfile,
-    IgnoreChangesToSelectedProfile,
-    CancelChangesToSelectedProfile,
-    SaveSelectedProfile,
+    ProfileSelect(String),
+    ProfileSave,
+
+    ProfileUnsavedChangesSave,
+    ProfileUnsavedChangesIgnore,
+    ProfileUnsavedChangesCancel,
+
     Search(String),
-    NewKeybindBegin,
-    NewKeybindSelectInputCategory(KeybindInputCategory),
-    NewKeybindSelectInputCode(KeybindInputCode),
-    NewKeybindSelectSource(KeybindSource),
-    NewKeybindSelectKeycode(KeybindKeycode),
-    NewKeybindSave,
-    NewKeybindCancel,
+    
+    KeybindEditorBeginNew,
+    KeybindEditorBeginEdit(KeybindId),
+    KeybindEditorSelectInputCategory(KeybindInputCategory),
+    KeybindEditorSelectInputCode(KeybindInputCode),
+    KeybindEditorSelectSource(KeybindSource),
+    KeybindEditorSelectKeycode(KeybindKeycode),
+    KeybindEditorSave,
+    KeybindEditorCancel,
+    
     DeleteKeybind(KeybindId),
+    
     MismatchRestore,
     MismatchReload,
 }
@@ -94,7 +107,22 @@ impl Keybindings {
         Self {
         }
     }
-
+    fn set_editor_combo_boxes(state: &mut State) {
+        state.keybind_editor_builder.input_category.as_ref().map(|input_category|{
+            state.keybind_editor_input_code_list_state = combo_box::State::new(state.input_codes
+                .get(input_category.index)
+                .unwrap()
+                .clone()
+            );
+        });
+        state.keybind_editor_builder.source.as_ref().map(|source|{
+            state.keybind_editor_keycode_list_state = combo_box::State::new(state.keycodes
+                .get(source.index)
+                .unwrap()
+                .clone()
+            );
+        });
+    }
     fn save_selected_profile(state: &State) {
         state.selected_profile.as_ref().map(|profile_ref| {
             let mut profile = profile_ref.borrow_mut();
@@ -138,7 +166,7 @@ impl Keybindings {
 
     pub fn update(state: &mut State, message: &Message) {
         match message {
-            Message::SelectNewProfile(name) => {
+            Message::ProfileSelect(name) => {
                 state.selected_profile_name = Some(name.clone());
 
                 if let Some(profile) = state.selected_profile.as_ref() {
@@ -149,82 +177,95 @@ impl Keybindings {
                 }
                 Self::load_selected_profile(state);
                 Self::verify_latest(state);
-            },
-            Message::SaveChangesToSelectedProfile => {
+            }
+            Message::ProfileSave => {
+                Self::save_selected_profile(state);
+            }
+            
+            Message::ProfileUnsavedChangesSave => {
                 state.prompt = None;
                 Self::save_selected_profile(state);
                 Self::load_selected_profile(state)
-            },
-            Message::IgnoreChangesToSelectedProfile => {
+            }
+            Message::ProfileUnsavedChangesIgnore => {
                 state.prompt = None;
                 Self::load_selected_profile(state)
-            },
-            Message::CancelChangesToSelectedProfile => {
+            }
+            Message::ProfileUnsavedChangesCancel => {
                 state.prompt = None
             }
-            Message::SaveSelectedProfile => {
-                Self::save_selected_profile(state);
-            },
+            
             Message::Search(string) => {
                 state.search_string = string.clone();
                 println!("Search: {}", string)
             }
-            Message::NewKeybindBegin => {
-                state.prompt = Some(Prompt::NewKeybind(Self::view_prompt_new_keybind));
-            },
-            Message::NewKeybindSelectInputCategory(_input_category) => {
+            
+            Message::KeybindEditorBeginNew => {
+                state.keybind_editor_mode = EditorMode::Adding;
+                state.prompt = Some(Prompt::KeybindEditor(Self::view_prompt_keybind_editor));
+                Self::set_editor_combo_boxes(state);
+            }
+
+            Message::KeybindEditorBeginEdit(id) => {
+                let Some(builder) = state.selected_profile.as_ref().map(|p| p.borrow().get_keybind_as_builder(id)) else { return };
+                
+                state.keybind_editor_builder = builder;
+                state.keybind_editor_mode = EditorMode::Modifying(*id);
+                state.prompt = Some(Prompt::KeybindEditor(Self::view_prompt_keybind_editor));
+                Self::set_editor_combo_boxes(state);
+            }
+            Message::KeybindEditorSelectInputCategory(_input_category) => {
                 let input_category = Some(_input_category.clone());
-                if state.new_keybind_builder.input_category == input_category { return };
+                if state.keybind_editor_builder.input_category == input_category { return };
 
-                state.new_keybind_builder.input_code = None;
-                state.new_keybind_builder.input_category = input_category;
+                state.keybind_editor_builder.input_code = None;
+                state.keybind_editor_builder.input_category = input_category;
 
-                state.new_keybind_input_code_list_state = combo_box::State::new(state.input_codes
-                    .get(_input_category.index)
-                    .unwrap()
-                    .clone()
-                );
-            },
-            Message::NewKeybindSelectInputCode(input_code) => {
-                state.new_keybind_builder.input_code = Some(input_code.clone());
-            },
-            Message::NewKeybindSelectSource(_source) => {
+                Self::set_editor_combo_boxes(state);
+            }
+            Message::KeybindEditorSelectInputCode(input_code) => {
+                state.keybind_editor_builder.input_code = Some(input_code.clone());
+            }
+            Message::KeybindEditorSelectSource(_source) => {
                 let source = Some(_source.clone());
-                if state.new_keybind_builder.source == source { return };
+                if state.keybind_editor_builder.source == source { return };
 
-                state.new_keybind_builder.keycode = None;
-                state.new_keybind_builder.source = source;
+                state.keybind_editor_builder.keycode = None;
+                state.keybind_editor_builder.source = source;
 
-                state.new_keybind_keycode_list_state = combo_box::State::new(state.keycodes
-                    .get(_source.index)
-                    .unwrap()
-                    .clone()
-                );
-            },
-            Message::NewKeybindSelectKeycode(keycode) => {
-                state.new_keybind_builder.keycode = Some(keycode.clone());
-            },
-            Message::NewKeybindSave => {
+                Self::set_editor_combo_boxes(state);
+            }
+            Message::KeybindEditorSelectKeycode(keycode) => {
+                state.keybind_editor_builder.keycode = Some(keycode.clone());
+            }
+            Message::KeybindEditorSave => {
                 state.prompt = None;
 
                 let (Some(input_category),Some(input_code),Some(source),Some(keycode))
-                    = state.new_keybind_builder.clone().into() else { return };
+                    = state.keybind_editor_builder.clone().into() else { return };
                 
 
                 state.selected_profile.as_ref().map(|profile_ref| {
                     let mut profile = profile_ref.borrow_mut();
-                    let id = profile.next_id();
-                    profile.add_keybind(Keybind::new_from_primitives(input_category, input_code, source, keycode, id));
+
+                    let id = match state.keybind_editor_mode {
+                        EditorMode::Adding => profile.next_id(),
+                        EditorMode::Modifying(id) => id,
+                    };
+
+                    profile.modify_or_add_keybind(Keybind::new_from_primitives(input_category, input_code, source, keycode, id));
                 });
             }
-            Message::NewKeybindCancel => {
+            Message::KeybindEditorCancel => {
                 state.prompt = None;
             }
+            
             Message::DeleteKeybind(id) => {
                 state.selected_profile.as_ref().map(|profile_ref| {
-                    profile_ref.borrow_mut().remove_keybind(*id);
+                    profile_ref.borrow_mut().remove_keybind(id);
                 });
-            },
+            }
+            
             Message::MismatchRestore => {
                 state.prompt = None;
                 Self::restore_selected_profile(state);
@@ -269,7 +310,7 @@ impl Keybindings {
                 pick_list(
                     available_profile_names,
                     selected_profile_name,
-                    Message::SelectNewProfile
+                    Message::ProfileSelect
                 )
                 .placeholder("none")
                 .text_size(HEADER_TEXT_SIZE)
@@ -282,7 +323,7 @@ impl Keybindings {
                     icon( if profile_modified_flag { Icon::SaveAs } else { Icon::Save }).size(HEADER_TEXT_SIZE).center()
                     .style( if profile_modified_flag { text::warning } else { text::default })
                 )
-                .on_press_maybe( if profile_modified_flag { Some(Message::SaveSelectedProfile) } else { None }).style(styling::button_transparent)
+                .on_press_maybe( if profile_modified_flag { Some(Message::ProfileSave) } else { None }).style(styling::button_transparent)
             )
             .height(iced::Fill)
             .align_y(iced::Center),
@@ -313,22 +354,33 @@ impl Keybindings {
                             text(keybind.input.code.pretty_name).size(KEYBIND_TEXT_SIZE),
                             text(keybind.input.category.pretty_name).size(KEYBIND_SUBTEXT_SIZE).style(text::secondary),
                             //text!("#{}", keybind.id).size(KEYBIND_SUBTEXT_SIZE).style(text::warning),
-                    ]).clip(true).width(iced::FillPortion(20)),
+                    ]).clip(true).width(iced::FillPortion(1)),
 
                     space().width(10),
                     
                     container(column![
                         text(keybind.key.source.pretty_name).size(KEYBIND_TEXT_SIZE),
                         text(keybind.key.source.desc).size(KEYBIND_SUBTEXT_SIZE).style(text::primary),
-                    ]).clip(true).width(iced::FillPortion(15)),
+                    ]).clip(true).width(iced::FillPortion(1)),
                     
                     space().width(10),
                     
                     container(column![
                         text(keybind.key.keycode.pretty_name).size(KEYBIND_TEXT_SIZE),
                         text(keybind.key.keycode.desc).size(KEYBIND_SUBTEXT_SIZE).style(text::primary),
-                    ]).clip(true).width(iced::FillPortion(10)),
+                    ]).clip(true).width(iced::FillPortion(1)),
                     
+                    container(
+                        button(
+                            icon(Icon::Edit).size(KEYBIND_ICON_SIZE).center()
+                        )
+                        .on_press(Message::KeybindEditorBeginEdit(keybind.id))
+                        .style(styling::button_transparent)
+                    )
+                    .align_right(Length::Fixed(KEYBIND_HEIGHT)),
+
+                    space().width(10),
+
                     container(
                         button(
                             icon(Icon::Cancel).size(KEYBIND_ICON_SIZE).center().style(text::danger)
@@ -357,7 +409,7 @@ impl Keybindings {
                 .size(24),
                 container( button(
                     icon(Icon::Add).size(TOOLBAR_ICON_SIZE).center(),
-                ).on_press(Message::NewKeybindBegin).style(button::success))
+                ).on_press(Message::KeybindEditorBeginNew).style(button::success))
                 .height(Length::Fill)
                 .width(Length::Shrink)
                 .style(container::bordered_box),
@@ -390,21 +442,21 @@ impl Keybindings {
                         text("Save  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
                         icon(Icon::AddCircle).size(UNSAVED_BUTTON_ICON_SIZE).center()
                     ].align_y(iced::Center))
-                    .on_press(Message::SaveChangesToSelectedProfile)
+                    .on_press(Message::ProfileUnsavedChangesSave)
                     .style(button::success),
                     space().width(UNSAVED_BUTTON_PADDING),
                     button(row![
                         text("Ignore  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
                         icon(Icon::Block).size(UNSAVED_BUTTON_ICON_SIZE).center()
                     ].align_y(iced::Center))
-                    .on_press(Message::IgnoreChangesToSelectedProfile)
+                    .on_press(Message::ProfileUnsavedChangesIgnore)
                     .style(button::danger),
                     space().width(UNSAVED_BUTTON_PADDING),
                     button(row![
                         text("Cancel  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
                         icon(Icon::Cancel).size(UNSAVED_BUTTON_ICON_SIZE).center()
                     ].align_y(iced::Center))
-                    .on_press(Message::CancelChangesToSelectedProfile)
+                    .on_press(Message::ProfileUnsavedChangesCancel)
                     .style(button::warning),
                 ]).align_right(Length::Fill)
             ]).padding(UNSAVED_BUTTON_PADDING),
@@ -415,26 +467,37 @@ impl Keybindings {
         
         content.map(keybind_manager::Message::Keybindings)
     }
-    pub fn view_prompt_new_keybind(state: &State) -> Element<'_, keybind_manager::Message> {
+    pub fn view_prompt_keybind_editor(state: &State) -> Element<'_, keybind_manager::Message> {
 
         let content: Element<'_, Message> =
         container(column![
+            space().height(NEWKEYBIND_COMBO_PADDING),
+
+            container(
+                match state.keybind_editor_mode{
+                    EditorMode::Adding => {row![text("New Keybind ").size(KEYBIND_TEXT_SIZE), icon(Icon::Add).size(KEYBIND_TEXT_SIZE).style(text::success)]},
+                    EditorMode::Modifying(_) => {row![text("Modify Keybind ").size(KEYBIND_TEXT_SIZE), icon(Icon::Edit).size(KEYBIND_TEXT_SIZE).style(text::warning)]},
+                }
+            )
+            .padding(iced::padding::left(NEWKEYBIND_COMBO_PADDING)),
+            
             container(
                 combo_box(
-                    &state.new_keybind_input_category_list_state, 
+                    &state.keybind_editor_input_category_list_state, 
                     "Input Category",
-                    state.new_keybind_builder.input_category.as_ref(),
-                    Message::NewKeybindSelectInputCategory
+                    state.keybind_editor_builder.input_category.as_ref(),
+                    Message::KeybindEditorSelectInputCategory
                 )
                 .size(KEYBIND_TEXT_SIZE)
             )
             .padding(NEWKEYBIND_COMBO_PADDING),
+            
             container(
                 combo_box(
-                    &state.new_keybind_input_code_list_state, 
+                    &state.keybind_editor_input_code_list_state, 
                     "Input Code",
-                    state.new_keybind_builder.input_code.as_ref(),
-                    Message::NewKeybindSelectInputCode
+                    state.keybind_editor_builder.input_code.as_ref(),
+                    Message::KeybindEditorSelectInputCode
                 )
                 .size(KEYBIND_TEXT_SIZE)
             )
@@ -443,41 +506,43 @@ impl Keybindings {
             row![
                 container(
                     combo_box(
-                        &state.new_keybind_source_list_state, 
+                        &state.keybind_editor_source_list_state, 
                         "Source",
-                        state.new_keybind_builder.source.as_ref(),
-                        Message::NewKeybindSelectSource
+                        state.keybind_editor_builder.source.as_ref(),
+                        Message::KeybindEditorSelectSource
                     )
                     .size(KEYBIND_TEXT_SIZE),
                 )
                 .padding( iced::padding::horizontal(NEWKEYBIND_COMBO_PADDING)),
+            
                 container(
                     combo_box(
-                        &state.new_keybind_keycode_list_state, 
-                        match state.new_keybind_builder.source {
+                        &state.keybind_editor_keycode_list_state, 
+                        match state.keybind_editor_builder.source {
                             None => "<- Select source",
                             _ => "Keycode",
                         },
-                        state.new_keybind_builder.keycode.as_ref(),
-                        Message::NewKeybindSelectKeycode
+                        state.keybind_editor_builder.keycode.as_ref(),
+                        Message::KeybindEditorSelectKeycode
                     )
                     .size(KEYBIND_TEXT_SIZE),
                 )
                 .width(Length::Fill),
+            
                 container(row![
-                    button(icon(Icon::AddCircle).style(match state.new_keybind_builder.clone().into() {
+                    button(icon(Icon::AddCircle).style(match state.keybind_editor_builder.clone().into() {
                             (Some(_), Some(_), Some(_), Some(_)) => text::success,
                             _ => text::default,
                         })
                         .size(NEWKEYBIND_BUTTON_ICON_SIZE))
-                        .on_press_maybe( match state.new_keybind_builder.clone().into() {
-                            (Some(_), Some(_), Some(_), Some(_)) => Some(Message::NewKeybindSave),
+                        .on_press_maybe( match state.keybind_editor_builder.clone().into() {
+                            (Some(_), Some(_), Some(_), Some(_)) => Some(Message::KeybindEditorSave),
                             _ => None,
                         })
                     .style(styling::button_transparent),
                     space().width(NEWKEYBIND_BUTTON_PADDING),
                     button(icon(Icon::Cancel).style(text::danger).size(NEWKEYBIND_BUTTON_ICON_SIZE))
-                    .on_press(Message::NewKeybindCancel)
+                    .on_press(Message::KeybindEditorCancel)
                     .style(styling::button_transparent),
                 ])
                 .padding(NEWKEYBIND_BUTTON_PADDING)

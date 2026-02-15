@@ -27,6 +27,7 @@ use crate::{
 
 pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
+
 #[derive(Debug, Clone, Default)]
 pub struct State {
     //universal
@@ -44,13 +45,14 @@ pub struct State {
     pub selected_profile_name: Option<String>,
     pub search_string: String,
     
-    // // new keybind prompt
-    pub new_keybind_builder: KeybindBuilder,
-
-    pub new_keybind_input_category_list_state: combo_box::State<KeybindInputCategory>,
-    pub new_keybind_input_code_list_state: combo_box::State<KeybindInputCode>,
-    pub new_keybind_source_list_state: combo_box::State<KeybindSource>,
-    pub new_keybind_keycode_list_state: combo_box::State<KeybindKeycode>,
+    
+    // // modify keybind prompt (used for new keybind aswell)
+    pub keybind_editor_builder: KeybindBuilder,
+    pub keybind_editor_mode: keybindings::EditorMode,
+    pub keybind_editor_input_category_list_state: combo_box::State<KeybindInputCategory>,
+    pub keybind_editor_input_code_list_state: combo_box::State<KeybindInputCode>,
+    pub keybind_editor_source_list_state: combo_box::State<KeybindSource>,
+    pub keybind_editor_keycode_list_state: combo_box::State<KeybindKeycode>,
 
 }
 
@@ -84,8 +86,8 @@ impl State {
             new.keycodes.push(keycode::get_all_keycodes_for_source(source));
         }
 
-        new.new_keybind_input_category_list_state = combo_box::State::new(new.input_categories.clone());
-        new.new_keybind_source_list_state = combo_box::State::new(new.key_sources.clone());
+        new.keybind_editor_input_category_list_state = combo_box::State::new(new.input_categories.clone());
+        new.keybind_editor_source_list_state = combo_box::State::new(new.key_sources.clone());
 
         let _ = new.discover_profiles(profiles_folder);
 

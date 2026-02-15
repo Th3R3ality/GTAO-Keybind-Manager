@@ -64,14 +64,34 @@ impl Profile{
         }))
     }
 
+    pub fn modify_or_add_keybind(&mut self, keybind: Keybind) {
+        match self.keybinds.iter_mut().find(|_keybind| _keybind.id == keybind.id) {
+            None => self.add_keybind(keybind),
+            Some(_keybind) => {
+                *_keybind = keybind;
+            }
+        }
+        self.modified = true;        
+    }
+
     pub fn add_keybind(&mut self, keybind: Keybind) {
+        if self.keybinds.iter().find(|_keybind| _keybind.id == keybind.id).is_some() {
+            panic!("Attempted to add a keybind with an id that already exists");
+        }
         self.keybinds.push(keybind);
         self.modified = true;
     }
 
-    pub fn remove_keybind(&mut self, id: KeybindId) {
-        self.keybinds.retain(|keybind| keybind.id != id);
+    pub fn remove_keybind(&mut self, id: &KeybindId) {
+        self.keybinds.retain(|keybind| &keybind.id != id);
         self.modified = true;
+    }
+
+    pub fn get_keybind_as_builder(&self, id: &KeybindId) -> KeybindBuilder {
+        match self.keybinds.iter().find(|keybind| &keybind.id == id) {
+            Some(keybind) => keybind.to_builder(),
+            None => KeybindBuilder::new_empty(),
+        }
     }
 
     /// writes profile to file and marks it as p.modified = false on success

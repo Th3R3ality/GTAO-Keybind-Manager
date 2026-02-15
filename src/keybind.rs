@@ -41,10 +41,6 @@ pub struct KeybindBuilder {
     pub keycode: Option<KeybindKeycode>,
 }
 
-
-
-
-
 impl KeybindInput {
     pub fn new(category: KeybindInputCategory, code: KeybindInputCode) -> Self {
         Self {
@@ -74,6 +70,14 @@ impl Keybind {
             input: KeybindInput::new(input_category, input_code),
             key: KeybindKey::new(source, keycode),
             id,
+        }
+    }
+    pub fn to_builder(&self) -> KeybindBuilder {
+        KeybindBuilder {
+            input_category: Some(self.input.category.clone()),
+            input_code: Some(self.input.code.clone()),
+            source: Some(self.key.source.clone()),
+            keycode: Some(self.key.keycode.clone()),
         }
     }
 }

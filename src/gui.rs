@@ -12,7 +12,9 @@ use crate::{
         State
     },
     screen::{
-        About, Keybindings, Screen
+        About, 
+        Keybindings, 
+        Screen,
     },
 };
 
@@ -28,7 +30,8 @@ type PromptFn = fn(&State) -> Element<'_, Message>;
 pub enum Prompt{
     ProfileMismatch(PromptFn),
     UnsavedChanges(PromptFn),
-    NewKeybind(PromptFn),
+    KeybindEditor(PromptFn),
+    EditKeybind(PromptFn),
 }
 
 pub fn run(state: State) -> iced::Result {
@@ -120,8 +123,9 @@ fn view(state: &State) -> Element<'_, Message> {
         opaque(container(
             match state.prompt {
                 Some(Prompt::ProfileMismatch(fun)) => fun(state),
-                Some(Prompt::NewKeybind(fun)) => fun(state),
                 Some(Prompt::UnsavedChanges(fun)) => fun(state),
+                Some(Prompt::KeybindEditor(fun)) => fun(state),
+                Some(Prompt::EditKeybind(fun)) => fun(state),
                 None => space().into(),
             }
         )
