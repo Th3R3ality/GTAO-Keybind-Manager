@@ -79,7 +79,7 @@ Currently i don't know of a way to get the username from this folder so trial an
    /Users/<user>/Library/Application Support/.keybindmanager/config.txt
    ```
 
-# For the Future
+# For the Future (in no particular order)
 1. presets tab and keybind sharing via code
 2. add **ctrl+z** *(undo)* and **ctrl+shift+z** *(redo)*
 3. on screen keyboard with tooltips showing what each key is bound to, recolor non-default bound keys
@@ -88,8 +88,9 @@ Currently i don't know of a way to get the username from this folder so trial an
 6. on windows, make the icon show on the executable
 7. make a button to easily pick and load from a .backup file
 8. show diff when mismatch is detected
-9. ???
-10. profit!
+9. add keyboard navigation
+10. ???
+11. profit!
 
 # Credits
 
