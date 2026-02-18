@@ -18,6 +18,10 @@ use iced::{
     }
 };
 
+use fuzzy_matcher::{
+    FuzzyMatcher, skim::SkimMatcherV2
+};
+
 use crate::{
     styling,
     asset::{
@@ -336,24 +340,38 @@ impl Keybindings {
         let profile = profile_ref.borrow();
         let keybinds = &profile.keybinds;
 
+        let matcher = SkimMatcherV2::default();
         let mut keybinds_sorted = keybinds.clone();
         keybinds_sorted.sort_by_key(|keybind|
-            (keybind.input.category.index, keybind.id)
+            (
+                match &state.search_string {
+                    s if s.starts_with("i:") => matcher.fuzzy_match(keybind.input.code.pretty_name, &s[2..]).unwrap_or(0),
+                    s if s.starts_with("s:") => matcher.fuzzy_match(keybind.key.source.pretty_name, &s[2..]).unwrap_or(0),
+                    s if s.starts_with("k:") => matcher.fuzzy_match(keybind.key.keycode.pretty_name, &s[2..]).unwrap_or(0),
+                    _ => [
+                        matcher.fuzzy_match(keybind.input.category.pretty_name, &state.search_string).unwrap_or(0),
+                        matcher.fuzzy_match(keybind.input.code.pretty_name, &state.search_string).unwrap_or(0),
+                        matcher.fuzzy_match(keybind.key.source.pretty_name, &state.search_string).unwrap_or(0),
+                        matcher.fuzzy_match(keybind.key.keycode.pretty_name, &state.search_string).unwrap_or(0)
+                    ].into_iter().max().unwrap_or(0),
+                },
+                keybind.input.category.index,
+                keybind.id
+            )
         );
-        
+        keybinds_sorted.reverse();
+
+
         let keybind_list = column![].extend(
             keybinds_sorted.iter()
-                .enumerate()
-                .map(|(index, keybind)|{
-
-                
+            .enumerate()
+            .map(|(index, keybind)|{
                 container(row![
                     space().width(10),
                     
                     container(column![
                             text(keybind.input.code.pretty_name).size(KEYBIND_TEXT_SIZE),
                             text(keybind.input.category.pretty_name).size(KEYBIND_SUBTEXT_SIZE).style(text::secondary),
-                            //text!("#{}", keybind.id).size(KEYBIND_SUBTEXT_SIZE).style(text::warning),
                     ]).clip(true).width(iced::FillPortion(1)),
 
                     space().width(10),
@@ -402,8 +420,7 @@ impl Keybindings {
     
         let toolbar = container(
             row![
-                //text_input("Search            Examples    \"weapon\"    \"i:frontend\"    \"s:mouse\"    \"k:enter\"", &state.search_string)
-                text_input("Search     ! not implemented !", &state.search_string)
+                text_input("Search        Filters: \"i:<input>\", \"s:<source>\", \"k:<key>\"", &state.search_string)
                 .on_input(Message::Search)
                 .line_height(LineHeight::Absolute(TOOLBAR_HEIGHT.into()))
                 .size(24),
