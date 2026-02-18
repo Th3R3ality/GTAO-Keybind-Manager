@@ -201,7 +201,6 @@ impl Keybindings {
             
             Message::Search(string) => {
                 state.search_string = string.clone();
-                println!("Search: {}", string)
             }
             
             Message::KeybindEditorBeginNew => {
