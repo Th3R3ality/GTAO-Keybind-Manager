@@ -23,52 +23,48 @@ use fuzzy_matcher::{
 };
 
 use crate::{
-    styling,
     asset::{
         Icon,
         icon,
-    },
-    keybind_manager::{
+    }, gui::Prompt, keybind::*, keybind_manager::{
         self,
         State,
-    },
-    keybind::*,
-    gui::{
-        Prompt,
-    },
+    }, profile::{
+        ProfileRef
+    }, screen::Screen, styling
 };
 
-const HEADER_TEXT_SIZE: f32 = 28.0;
+pub const HEADER_TEXT_SIZE: f32 = 28.0;
 
-const TOOLBAR_HEIGHT: f32 = 40.0;
-const TOOLBAR_ICON_SIZE: f32 = 28.0;
+pub const TOOLBAR_HEIGHT: f32 = 40.0;
+pub const TOOLBAR_ICON_SIZE: f32 = 28.0;
 
-const KEYBIND_TEXT_SIZE: f32 = 20.0;
-const KEYBIND_SUBTEXT_SIZE: f32 = 12.0;
-const KEYBIND_ROW_PADDING: f32 = 4.0;
-const KEYBIND_HEIGHT: f32 = 50.0;
-const KEYBIND_ICON_SIZE: f32 = 36.0;
+pub const KEYBIND_TEXT_SIZE: f32 = 20.0;
+pub const KEYBIND_SUBTEXT_SIZE: f32 = 12.0;
+pub const KEYBIND_ROW_PADDING: f32 = 4.0;
+pub const KEYBIND_HEIGHT: f32 = 50.0;
+pub const KEYBIND_ICON_SIZE: f32 = 36.0;
 
-const UNSAVED_PROMPT_WIDTH: f32 = 500.0;
-const UNSAVED_TITLE_SIZE: f32 = 28.0;
-const UNSAVED_TITLE_PADDING: f32 = 24.0;
-const UNSAVED_TITLE_GAP: f32 = 48.0; // space().height() between title and buttons
-const UNSAVED_BUTTON_TEXT_SIZE: f32 = 20.0;
-const UNSAVED_BUTTON_ICON_SIZE: f32 = 28.0;
-const UNSAVED_BUTTON_PADDING: f32 = 14.0;
+pub const UNSAVED_PROMPT_WIDTH: f32 = 500.0;
+pub const UNSAVED_TITLE_SIZE: f32 = 28.0;
+pub const UNSAVED_TITLE_PADDING: f32 = 24.0;
+pub const UNSAVED_TITLE_GAP: f32 = 48.0; // space().height() between title and buttons
+pub const UNSAVED_BUTTON_TEXT_SIZE: f32 = 20.0;
+pub const UNSAVED_BUTTON_ICON_SIZE: f32 = 28.0;
+pub const UNSAVED_BUTTON_PADDING: f32 = 14.0;
 
-const MISMATCH_PROMPT_WIDTH: f32 = UNSAVED_PROMPT_WIDTH; //500.0;
-const MISMATCH_TITLE_SIZE: f32 = UNSAVED_TITLE_SIZE; //28.0;
-const MISMATCH_TITLE_PADDING: f32 = UNSAVED_TITLE_PADDING; //24.0;
-const MISMATCH_TITLE_GAP: f32 = UNSAVED_TITLE_GAP; //48.0;
-const MISMATCH_BUTTON_TEXT_SIZE: f32 = UNSAVED_BUTTON_TEXT_SIZE; //20.0;
-const MISMATCH_BUTTON_ICON_SIZE: f32 = UNSAVED_BUTTON_ICON_SIZE; //28.0;
-const MISMATCH_BUTTON_PADDING: f32 = UNSAVED_BUTTON_PADDING; //14.0;
+pub const MISMATCH_PROMPT_WIDTH: f32 = UNSAVED_PROMPT_WIDTH; //500.0;
+pub const MISMATCH_TITLE_SIZE: f32 = UNSAVED_TITLE_SIZE; //28.0;
+pub const MISMATCH_TITLE_PADDING: f32 = UNSAVED_TITLE_PADDING; //24.0;
+pub const MISMATCH_TITLE_GAP: f32 = UNSAVED_TITLE_GAP; //48.0;
+pub const MISMATCH_BUTTON_TEXT_SIZE: f32 = UNSAVED_BUTTON_TEXT_SIZE; //20.0;
+pub const MISMATCH_BUTTON_ICON_SIZE: f32 = UNSAVED_BUTTON_ICON_SIZE; //28.0;
+pub const MISMATCH_BUTTON_PADDING: f32 = UNSAVED_BUTTON_PADDING; //14.0;
 
-const NEWKEYBIND_PROMPT_WIDTH: f32 = 600.0;
-const NEWKEYBIND_BUTTON_ICON_SIZE: f32 = 36.0;
-const NEWKEYBIND_BUTTON_PADDING: f32 = 8.0;
-const NEWKEYBIND_COMBO_PADDING: f32 = 12.0;
+pub const NEWKEYBIND_PROMPT_WIDTH: f32 = 600.0;
+pub const NEWKEYBIND_BUTTON_ICON_SIZE: f32 = 36.0;
+pub const NEWKEYBIND_BUTTON_PADDING: f32 = 8.0;
+pub const NEWKEYBIND_COMBO_PADDING: f32 = 12.0;
 
 #[derive(Debug, Clone, Default)]
 pub enum EditorMode {
@@ -135,7 +131,7 @@ impl Keybindings {
             }
         });
     }
-    fn load_selected_profile(state: &mut State) {
+    pub fn load_selected_profile(state: &mut State) {
         let Some(selected_profile_name) = state.selected_profile_name.as_ref() else { return };
 
         let Some(profile_ref) = state
@@ -282,7 +278,7 @@ impl Keybindings {
         }
     }
 
-    pub fn view(&self, state: &State) -> (Element<'_, Message>, Element<'_, Message>) {
+    pub fn view<'a>(&self, state: &'a State) -> (Element<'a, Message>, Element<'a, Message>) {
 
         let available_profile_names: Vec<String> = state.available_profiles
             .iter()
@@ -333,9 +329,25 @@ impl Keybindings {
         ]
         ).align_left(iced::Fill).into();
         
-        let Some(profile_ref) = &state.selected_profile else {
+        
+        let Some(profile_ref) = state.selected_profile.clone() else {
             return (container(text("No Profile Selected").center()).center(Length::Fill).into(), header)
         };
+
+        let content = match state.screen {
+            Screen::Keybindings(_) => Self::view_keybindings_content(state, profile_ref),
+            Screen::Share(_) => Self::view_share_content(state, profile_ref),
+            _ => text("error you cant possibly be on this screen").into(),
+        };
+
+        return (
+            content,
+            header
+        )
+    }
+
+    fn view_keybindings_content(state: &State, profile_ref: ProfileRef) -> Element<'_, Message> {
+        let content = {
         let profile = profile_ref.borrow();
         let keybinds = &profile.keybinds;
 
@@ -416,7 +428,12 @@ impl Keybindings {
                 .into()
             })
         );
-    
+        scrollable(keybind_list)
+        };
+
+
+
+
         let toolbar = container(
             row![
                 text_input("Search        Filters: \"i:<input>\", \"s:<source>\", \"k:<key>\"", &state.search_string)
@@ -433,14 +450,21 @@ impl Keybindings {
         )
         .align_right(Length::Fill)
         .height(Length::Fixed(TOOLBAR_HEIGHT));
-        
-    return (
-            column!(
-                toolbar,
-                scrollable(keybind_list)
-            ).into(),
-            header
-        )
+
+        column!(
+            toolbar,
+            content,
+        ).into()
+    }
+    
+    fn view_share_content(state: &State, profile_ref: ProfileRef) -> Element<'_, Message> {
+
+
+        // add import text box and button
+
+        // add export button (disabled if profile is modified)
+
+        text("lalala share tab").into()
     }
 
     pub fn view_prompt_unsaved_changes(_state: &State) -> Element<'_, keybind_manager::Message> {

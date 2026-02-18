@@ -10,4 +10,5 @@ pub enum Screen {
     Landing,
     Keybindings(Keybindings),
     About(About),
+    Share(Keybindings),
 }

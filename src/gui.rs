@@ -74,12 +74,18 @@ fn view(state: &State) -> Element<'_, Message> {
     let header_navigation = container(row![
         navigation_button(state, Icon::Keyboard, Screen::Keybindings(Keybindings::new())),
         space().width(Length::Fixed(HEADER_PADDING)),
+        navigation_button(state, Icon::Share, Screen::Share(Keybindings::new())),
+        space().width(Length::Fixed(HEADER_PADDING)),
         navigation_button(state, Icon::Help, Screen::About(About::new())),
     ]).align_right(Length::Shrink);
     
     let (content, screen_header) = match &state.screen {
 
         Screen::Keybindings(screen) => {
+            let (a, b) = screen.view(&state);
+            (a.map(Message::Keybindings), b.map(Message::Keybindings))
+        },
+        Screen::Share(screen) => {
             let (a, b) = screen.view(&state);
             (a.map(Message::Keybindings), b.map(Message::Keybindings))
         },

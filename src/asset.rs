@@ -12,6 +12,7 @@ pub const ICON_FONT: Font = Font::with_name("Material Icons");
 #[repr(u32)]
 #[derive(Clone, Copy)]
 pub enum Icon {
+    Share = '\u{e80d}' as u32,
     Edit = '\u{e3c9}' as u32,
     Block = '\u{e14b}' as u32,
     SaveAs = '\u{eb60}' as u32,
