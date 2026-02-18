@@ -84,12 +84,11 @@ Currently i don't know of a way to get the username from this folder so trial an
 2. add **ctrl+z** *(undo)* and **ctrl+shift+z** *(redo)*
 3. on screen keyboard with tooltips showing what each key is bound to, recolor non-default bound keys
 4. implement localization using localization mappings (/controls/keyboard layout/)
-5. add search
-6. on windows, make the icon show on the executable
-7. make a button to easily pick and load from a .backup file
-8. add keyboard navigation
-9. ???
-10. profit!
+5. on windows, make the icon show on the executable
+6. make a button to easily pick and load from a .backup file
+7. add keyboard navigation
+8. ???
+9. profit!
 
 # Credits
 
