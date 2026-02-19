@@ -104,6 +104,29 @@ pub fn get_indices(input_code: &str) -> Option<KeybindInput> {
     })
 }
 
+pub fn from_indices(category_index: usize, input_code_index: usize) -> Option<KeybindInput> {
+    INPUT_CODES
+    .get(category_index)
+    .and_then(|category_array| {
+        let category = category_array.first()?;
+        let code = category_array.iter().nth(input_code_index)?;
+        Some(KeybindInput {
+            category: KeybindInputCategory {
+                index: category_index,
+                name: category.0,
+                pretty_name: category.1,
+                desc: category.2,
+            },
+            code: KeybindInputCode {
+                index: input_code_index,
+                name: code.0,
+                pretty_name: code.1,
+                desc: code.2,
+            }
+        })
+    })
+}
+
 pub fn get_all_categories() -> Vec<KeybindInputCategory> {
     INPUT_CODES
     .iter()

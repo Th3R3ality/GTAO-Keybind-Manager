@@ -9,6 +9,9 @@ use std::{
 
 use chrono::Local;
 
+use base64::prelude::*;
+use zstd;
+
 use crate::{
     input,
     keycode,
@@ -28,6 +31,7 @@ pub struct Profile {
 }
 
 pub type ProfileRef = Rc<RefCell<Profile>>;
+
 
 const USER_HEADER: &str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 const USER_WRAPPER: &str = "rage__ControlInput__ControlSettings";
@@ -96,7 +100,8 @@ impl Profile{
 
     /// writes profile to file and marks it as p.modified = false on success
     pub fn write_xml(&mut self) -> std::result::Result<(), (String, String)> {
-
+        // TODO: write profile name to xml comment
+        // TODO: copy to config/presets/<profile name>.xml
         let suffix = Local::now().format("_%d_%m_%y_%H%M").to_string();
 
         let mut counter = 0;
@@ -208,6 +213,7 @@ impl Profile{
         latest == current
     }
     fn load_xml(path: &PathBuf) -> std::result::Result<Vec<Keybind>, (String, String)> {
+        // TODO: add reading profile name from xml comment
         let res = fs::read_to_string(path);
 
         let lines: Vec<String> = match res {
@@ -303,6 +309,84 @@ impl Profile{
     pub fn next_id(&mut self) -> KeybindId {
         self.id_counter += 1;
         self.id_counter
+    }
+    pub fn rename(&mut self, new_name: String) {
+        self.name = new_name;
+    }
+
+    pub const PROFILE_VERSION: u8 = 1;
+    pub const PROFILE_VERSION_BYTES: usize = size_of::<u8>();
+    pub const PROFILE_NAME_LENGTH_BYTES: usize = size_of::<usize>();
+    pub fn serialized(&self) -> String {
+        let mut collector: Vec<u8> = Vec::new();
+        collector.push(Self::PROFILE_VERSION);
+
+        collector.extend_from_slice(&self.name.as_bytes().len().to_ne_bytes());
+        assert_eq!(Self::PROFILE_NAME_LENGTH_BYTES, self.name.as_bytes().len().to_ne_bytes().len());
+
+        collector.extend_from_slice(&self.name.as_bytes());
+
+        for keybind in &self.keybinds {
+            collector.push(keybind.input.category.index as u8);
+            collector.push(keybind.input.code.index as u8);
+            collector.push(keybind.key.source.index as u8);
+            collector.push(keybind.key.keycode.index as u8);
+        }
+
+        let Ok(compressed) = zstd::encode_all(&collector[..], 0) else { return "".to_owned() };
+        BASE64_STANDARD.encode(compressed)
+    }
+    pub fn load_serialized(&mut self, serialized_data: String) -> std::result::Result<(), String> {
+        let Ok(compressed) = BASE64_STANDARD.decode(serialized_data) else { return Err("error decoding base64".to_string()) };
+        let Ok(data) = zstd::decode_all(&compressed[..]) else { return Err("error decompressing".to_owned())};
+        let Some(version) = data.first() else { return Err("".to_owned())};
+
+        // TODO: make function and return mismatch older or newer
+        if *version != Self::PROFILE_VERSION { return Err("version mismatch".to_owned())};
+
+        let offset = Self::PROFILE_VERSION_BYTES;
+
+        let name_len_range = offset..offset + Self::PROFILE_NAME_LENGTH_BYTES;
+        let Some(name_length_slice) = data.get(name_len_range) else { return Err("Data too short for name length prefix".to_string())};
+
+        let Ok(name_length_bytes) = name_length_slice.try_into() else { return Err("internal error: name length slice wrong size".to_string())};
+
+        let name_length = usize::from_le_bytes(name_length_bytes);
+
+        let name_start = offset + Self::PROFILE_NAME_LENGTH_BYTES;
+        let name_end = name_start + name_length;
+
+        let Some(name_slice) = data.get(name_start..name_end) else { return Err(format!("Data too short for name (expected {} bytes)", name_length))};
+
+        let Ok(name) = String::from_utf8(name_slice.to_vec()) else { return Err(format!("Invalid UTF-8 in name"))};
+
+        self.name = name;
+
+        let mut collector: Vec<Keybind> = Vec::new();
+        for chunk in data.get(Self::PROFILE_VERSION_BYTES + Self::PROFILE_NAME_LENGTH_BYTES + name_length..).unwrap().chunks(4) {
+            let Some(input_category) = chunk.iter().nth(0) else { return Err("".to_owned()) };
+            let Some(input_code) = chunk.iter().nth(1) else { return Err("".to_owned()) };
+            let Some(key_source) = chunk.iter().nth(2) else { return Err("".to_owned()) };
+            let Some(key_keycode) = chunk.iter().nth(3) else { return Err("".to_owned()) };
+
+            let Some(input) = input::from_indices(
+                input_category.clone() as usize,
+                input_code.clone() as usize,
+            ) else { return Err(format!("invalid input indices {input_category} {input_code}")) };
+            let Some(key) = keycode::from_indices(
+                key_source.clone() as usize,
+                key_keycode.clone() as usize,
+            ) else { return Err(format!("invalid key indices {key_source} {key_keycode}")) };
+            collector.push(Keybind::new(
+                input,
+                key,
+                self.next_id()
+            ));
+        }
+
+        self.keybinds = collector;
+        self.modified = true;
+        Ok(())
     }
 }
 

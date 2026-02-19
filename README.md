@@ -80,15 +80,14 @@ Currently i don't know of a way to get the username from this folder so trial an
    ```
 
 # For the Future (in no particular order)
-1. presets tab and keybind sharing via code
-2. add **ctrl+z** *(undo)* and **ctrl+shift+z** *(redo)*
-3. on screen keyboard with tooltips showing what each key is bound to, recolor non-default bound keys
-4. implement localization using localization mappings (/controls/keyboard layout/)
-5. on windows, make the icon show on the executable
-6. make a button to easily pick and load from a .backup file
-7. add keyboard navigation
-8. ???
-9. profit!
+1. add **ctrl+z** *(undo)* and **ctrl+shift+z** *(redo)*
+2. on screen keyboard with tooltips showing what each key is bound to, recolor non-default bound keys
+3. implement localization using localization mappings (/controls/keyboard layout/)
+4. on windows, make the icon show on the executable
+5. make a button to easily pick and load from a .backup file
+6. add keyboard navigation
+7. ???
+8. profit!
 
 # Credits
 

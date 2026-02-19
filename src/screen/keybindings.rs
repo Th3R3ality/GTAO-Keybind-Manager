@@ -1,20 +1,6 @@
 use iced::{
-    Element,
-    Length,
-    widget::{
-        combo_box,
-        button,
-        column,
-        container,
-        pick_list,
-        row,
-        scrollable,
-        space,
-        text,
-        text::{ 
-            LineHeight,
-        },
-        text_input,
+    Element, Length, Task, clipboard, widget::{
+        button, column, combo_box, container, pick_list, row, scrollable, space, text, text::LineHeight, text_input
     }
 };
 
@@ -66,6 +52,9 @@ pub const NEWKEYBIND_BUTTON_ICON_SIZE: f32 = 36.0;
 pub const NEWKEYBIND_BUTTON_PADDING: f32 = 8.0;
 pub const NEWKEYBIND_COMBO_PADDING: f32 = 12.0;
 
+pub const SHARE_TEXT_SIZE: f32 = HEADER_TEXT_SIZE;
+pub const SHARE_PADDING: f32 = 24.0;
+
 #[derive(Debug, Clone, Default)]
 pub enum EditorMode {
 #[default]
@@ -93,8 +82,19 @@ pub enum Message {
     KeybindEditorSave,
     KeybindEditorCancel,
     
+    RenameBegin,
+    RenameInputBoxChanged(String),
+    RenameFinalize,
+
     DeleteKeybind(KeybindId),
     
+    ShareExportProfileToClipboard,
+    ShareImportInputBox(String),
+    ShareImport,
+    ShareImportUnsavedSave,
+    ShareImportUnsavedIgnore,
+    ShareImportUnsavedCancel,
+
     MismatchRestore,
     MismatchReload,
 }
@@ -132,7 +132,7 @@ impl Keybindings {
         });
     }
     pub fn load_selected_profile(state: &mut State) {
-        let Some(selected_profile_name) = state.selected_profile_name.as_ref() else { return };
+        let Some(selected_profile_name) = state.requested_profile.as_ref() else { return };
 
         let Some(profile_ref) = state
             .available_profiles
@@ -145,7 +145,9 @@ impl Keybindings {
         let res = profile.load().err();
         match res {
             Some(err) => println!("load: Error reading xml: {} | {}", err.0, err.1),
-            None => state.selected_profile = Some(profile_ref.clone()),
+            None => {
+                state.selected_profile = Some(profile_ref.clone())
+            },
         }
     }
     fn restore_selected_profile(state: &mut State) {
@@ -156,6 +158,18 @@ impl Keybindings {
         ()
     }
 
+    pub fn load_serialized(state: &mut State) {
+        let Some(profile_ref) = state.selected_profile.clone() else { return };
+        let mut profile = profile_ref.borrow_mut();
+        
+        match profile.load_serialized(state.import_string.to_owned()){
+            Ok(_) => {
+                state.import_string = "".to_owned()
+            },
+            Err(err) => state.import_string = err,
+        }
+    }
+
     pub fn verify_latest(state: &mut State){
         let Some(profile_ref) = &state.selected_profile else { return };
         let profile = profile_ref.borrow();
@@ -164,15 +178,22 @@ impl Keybindings {
         }
     }
 
-    pub fn update(state: &mut State, message: &Message) {
+    pub fn update(state: &mut State, message: &Message) -> iced::Task<Message>{
         match message {
             Message::ProfileSelect(name) => {
-                state.selected_profile_name = Some(name.clone());
+                state.requested_profile = Some(name.clone());
 
                 if let Some(profile) = state.selected_profile.as_ref() {
                     if profile.borrow().modified {
-                        state.prompt = Some(Prompt::UnsavedChanges(Self::view_prompt_unsaved_changes));
-                        return
+                        state.prompt = Some(
+                            Prompt::UnsavedChanges(
+                                Self::view_prompt_unsaved_changes,
+                                Message::ProfileUnsavedChangesSave,
+                                Message::ProfileUnsavedChangesIgnore,
+                                Message::ProfileUnsavedChangesCancel
+                            )
+                        );
+                        return Task::none()
                     }
                 }
                 Self::load_selected_profile(state);
@@ -206,7 +227,7 @@ impl Keybindings {
             }
 
             Message::KeybindEditorBeginEdit(id) => {
-                let Some(builder) = state.selected_profile.as_ref().map(|p| p.borrow().get_keybind_as_builder(id)) else { return };
+                let Some(builder) = state.selected_profile.as_ref().map(|p| p.borrow().get_keybind_as_builder(id)) else { return Task::none() };
                 
                 state.keybind_editor_builder = builder;
                 state.keybind_editor_mode = EditorMode::Modifying(*id);
@@ -215,7 +236,7 @@ impl Keybindings {
             }
             Message::KeybindEditorSelectInputCategory(_input_category) => {
                 let input_category = Some(_input_category.clone());
-                if state.keybind_editor_builder.input_category == input_category { return };
+                if state.keybind_editor_builder.input_category == input_category { return Task::none() };
 
                 state.keybind_editor_builder.input_code = None;
                 state.keybind_editor_builder.input_category = input_category;
@@ -227,7 +248,7 @@ impl Keybindings {
             }
             Message::KeybindEditorSelectSource(_source) => {
                 let source = Some(_source.clone());
-                if state.keybind_editor_builder.source == source { return };
+                if state.keybind_editor_builder.source == source { return Task::none() };
 
                 state.keybind_editor_builder.keycode = None;
                 state.keybind_editor_builder.source = source;
@@ -241,7 +262,7 @@ impl Keybindings {
                 state.prompt = None;
 
                 let (Some(input_category),Some(input_code),Some(source),Some(keycode))
-                    = state.keybind_editor_builder.clone().into() else { return };
+                    = state.keybind_editor_builder.clone().into() else { return Task::none()};
                 
 
                 state.selected_profile.as_ref().map(|profile_ref| {
@@ -259,10 +280,78 @@ impl Keybindings {
                 state.prompt = None;
             }
             
+            Message::RenameBegin => {
+                state.selected_profile.as_ref().map(|profile_ref| {
+                    state.renaming_profile = true;
+                    state.renaming_profile_string = profile_ref.borrow_mut().name.clone();
+                });
+            }
+            Message::RenameInputBoxChanged(string) => {
+                state.renaming_profile_string = string.clone();
+            }
+            Message::RenameFinalize => {
+                state.selected_profile.as_ref().map(|profile_ref| {
+                    profile_ref.borrow_mut().name = state.renaming_profile_string.clone();
+                    state.renaming_profile = false;
+                });
+            }
+
             Message::DeleteKeybind(id) => {
                 state.selected_profile.as_ref().map(|profile_ref| {
                     profile_ref.borrow_mut().remove_keybind(id);
                 });
+            }
+            Message::ShareExportProfileToClipboard => {
+                let Some(profile_ref) = state.selected_profile.clone() else { return Task::none() };
+                let profile = profile_ref.borrow();
+                let serialized = profile.serialized();
+                println!("{:?}", serialized);
+                return clipboard::write(serialized)
+            }
+            Message::ShareImportInputBox(str) => {
+                state.import_string = str.clone();
+            }
+            Message::ShareImport => {
+                {
+                    let Some(profile_ref) = state.selected_profile.clone() else { return Task::none() };
+                    let profile = profile_ref.borrow();
+                    if profile.modified {
+                        state.prompt = Some(Prompt::UnsavedChanges(
+                            Self::view_prompt_unsaved_changes,
+                            Message::ShareImportUnsavedSave,
+                            Message::ShareImportUnsavedIgnore,
+                            Message::ShareImportUnsavedCancel
+                        ));
+                        return Task::none()
+                    }
+                }
+                Self::load_serialized(state);
+
+                // TODO: list of buttons to load config/presets/<names>
+                // probably just save them as xml files in config/presets
+            }
+            Message::ShareImportUnsavedSave => {
+                Self::save_selected_profile(state);
+                
+                let Some(profile_ref) = state.selected_profile.clone() else { return Task::none() };
+                let mut profile = profile_ref.borrow_mut();
+                match profile.load_serialized(state.import_string.to_owned()){
+                    Ok(_) => state.import_string = "".to_owned(),
+                    Err(err) => state.import_string = err,
+                }
+                state.prompt = None;
+            }
+            Message::ShareImportUnsavedIgnore => {
+                let Some(profile_ref) = state.selected_profile.clone() else { return Task::none() };
+                let mut profile = profile_ref.borrow_mut();
+                match profile.load_serialized(state.import_string.to_owned()){
+                    Ok(_) => state.import_string = "".to_owned(),
+                    Err(err) => state.import_string = err,
+                }
+                state.prompt = None;
+            }
+            Message::ShareImportUnsavedCancel => {
+                state.prompt = None;
             }
             
             Message::MismatchRestore => {
@@ -274,8 +363,10 @@ impl Keybindings {
                 state.prompt = None;
                 Self::load_selected_profile(state);
                 Self::save_selected_profile(state);
-            },
+            }
         }
+
+        Task::none()
     }
 
     pub fn view<'a>(&self, state: &'a State) -> (Element<'a, Message>, Element<'a, Message>) {
@@ -297,6 +388,27 @@ impl Keybindings {
             _ => false,
         };
 
+        let picker_content: iced::Element<'_, Message> = match state.renaming_profile {
+                    false => {
+                        pick_list(
+                            available_profile_names,
+                            selected_profile_name,
+                            Message::ProfileSelect
+                        )
+                        .placeholder("none")
+                        .text_size(HEADER_TEXT_SIZE)
+                        .into()
+                    },
+                    true => {
+                        text_input("", &state.renaming_profile_string)
+                        .size(HEADER_TEXT_SIZE)
+                        .width(400)
+                        .on_input(Message::RenameInputBoxChanged)
+                        .on_submit(Message::RenameFinalize)
+                        .into()
+                    },
+                };
+
         let header: Element<'_, Message> = container(
         row![
             text("Profile:")
@@ -306,17 +418,21 @@ impl Keybindings {
             .width(iced::Shrink).height(iced::Fill),
             space().width(Length::Fixed(HEADER_TEXT_SIZE / 2.0)),
             container(
-                pick_list(
-                    available_profile_names,
-                    selected_profile_name,
-                    Message::ProfileSelect
-                )
-                .placeholder("none")
-                .text_size(HEADER_TEXT_SIZE)
+                picker_content
             )
             .height(iced::Fill)
             .align_y(iced::Center),
             space().width(Length::Fixed(HEADER_TEXT_SIZE / 4.0)),
+            container(
+                button(
+                    icon(if state.renaming_profile { Icon::Add } else { Icon::Edit }).size(HEADER_TEXT_SIZE).center()
+                    .style( if state.renaming_profile { text::success } else { text::default })
+                )
+                .on_press_maybe( if state.renaming_profile { Some(Message::RenameFinalize) } else { Some(Message::RenameBegin) })
+                .style(styling::button_transparent)
+            )
+            .height(iced::Fill)
+            .align_y(iced::Center),
             container(
                 button(
                     icon( if profile_modified_flag { Icon::SaveAs } else { Icon::Save }).size(HEADER_TEXT_SIZE).center()
@@ -457,18 +573,25 @@ impl Keybindings {
         ).into()
     }
     
-    fn view_share_content(state: &State, profile_ref: ProfileRef) -> Element<'_, Message> {
+    fn view_share_content(state: &State, _profile_ref: ProfileRef) -> Element<'_, Message> {
+        let content = container(column![
+            row![
+                button(text("Export to clipboard").size(SHARE_TEXT_SIZE))
+                .on_press(Message::ShareExportProfileToClipboard),
+            ],
+            
+            space().height(SHARE_PADDING),
 
-
-        // add import text box and button
-
-        // add export button (disabled if profile is modified)
-
-        text("lalala share tab").into()
+            text_input("Import from code (press enter to submit)", &state.import_string)
+            .size(SHARE_TEXT_SIZE)
+            .on_input(Message::ShareImportInputBox)
+            .on_submit(Message::ShareImport),
+        ]).padding(SHARE_PADDING);
+        
+        content.into()
     }
 
-    pub fn view_prompt_unsaved_changes(_state: &State) -> Element<'_, keybind_manager::Message> {
-
+    pub fn view_prompt_unsaved_changes(_state: &State, accept_message: Message, ignore_message: Message, cancel_message: Message) -> Element<'_, keybind_manager::Message> {
         let content: Element<'_, Message> =
         container(column![
             container(
@@ -482,21 +605,21 @@ impl Keybindings {
                         text("Save  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
                         icon(Icon::AddCircle).size(UNSAVED_BUTTON_ICON_SIZE).center()
                     ].align_y(iced::Center))
-                    .on_press(Message::ProfileUnsavedChangesSave)
+                    .on_press(accept_message)
                     .style(button::success),
                     space().width(UNSAVED_BUTTON_PADDING),
                     button(row![
                         text("Ignore  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
                         icon(Icon::Block).size(UNSAVED_BUTTON_ICON_SIZE).center()
                     ].align_y(iced::Center))
-                    .on_press(Message::ProfileUnsavedChangesIgnore)
+                    .on_press(ignore_message)
                     .style(button::danger),
                     space().width(UNSAVED_BUTTON_PADDING),
                     button(row![
                         text("Cancel  ").size(UNSAVED_BUTTON_TEXT_SIZE).center(),
                         icon(Icon::Cancel).size(UNSAVED_BUTTON_ICON_SIZE).center()
                     ].align_y(iced::Center))
-                    .on_press(Message::ProfileUnsavedChangesCancel)
+                    .on_press(cancel_message)
                     .style(button::warning),
                 ]).align_right(Length::Fill)
             ]).padding(UNSAVED_BUTTON_PADDING),

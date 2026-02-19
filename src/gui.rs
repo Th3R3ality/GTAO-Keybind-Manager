@@ -13,7 +13,8 @@ use crate::{
     },
     screen::{
         About, 
-        Keybindings, 
+        Keybindings,
+        keybindings,
         Screen,
     },
 };
@@ -24,14 +25,13 @@ pub const HEADER_HEIGHT: f32 = 75.0;
 
 pub const NAVIGATION_ICON_SIZE: f32 = 40.0;
 
-type PromptFn = fn(&State) -> Element<'_, Message>;
-
 #[derive(Debug, Clone)]
 pub enum Prompt{
-    ProfileMismatch(PromptFn),
-    UnsavedChanges(PromptFn),
-    KeybindEditor(PromptFn),
-    EditKeybind(PromptFn),
+    ProfileMismatch(fn(&State) -> Element<'_, Message>),
+    UnsavedChanges(fn(&State, keybindings::Message, keybindings::Message, keybindings::Message) -> Element<'_, Message>,
+         keybindings::Message, keybindings::Message, keybindings::Message),
+    KeybindEditor(fn(&State) -> Element<'_, Message>),
+    EditKeybind(fn(&State) -> Element<'_, Message>),
 }
 
 pub fn run(state: State) -> iced::Result {
@@ -63,7 +63,9 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
                 state.screen = screen;
             }
         },
-        Message::Keybindings(message) => Keybindings::update(state, &message),
+        Message::Keybindings(message) => {
+            return Keybindings::update(state, &message).map(Message::Keybindings)
+        },
         Message::About(message) => About::update(state, &message),
     }
 
@@ -127,9 +129,9 @@ fn view(state: &State) -> Element<'_, Message> {
     }
     else {
         opaque(container(
-            match state.prompt {
+            match &state.prompt {
                 Some(Prompt::ProfileMismatch(fun)) => fun(state),
-                Some(Prompt::UnsavedChanges(fun)) => fun(state),
+                Some(Prompt::UnsavedChanges(fun, m1, m2, m3)) => fun(state, m1.clone(), m2.clone(), m3.clone()),
                 Some(Prompt::KeybindEditor(fun)) => fun(state),
                 Some(Prompt::EditKeybind(fun)) => fun(state),
                 None => space().into(),

@@ -27,7 +27,6 @@ use crate::{
 
 pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-
 #[derive(Debug, Clone, Default)]
 pub struct State {
     //universal
@@ -42,10 +41,12 @@ pub struct State {
     // keybindings screen
     pub available_profiles: Vec<ProfileRef>,
     pub selected_profile: Option<ProfileRef>,
-    pub selected_profile_name: Option<String>,
+    pub requested_profile: Option<String>,
     pub search_string: String,
-    
-    
+
+    pub renaming_profile: bool,
+    pub renaming_profile_string: String,
+
     // // modify keybind prompt (used for new keybind aswell)
     pub keybind_editor_builder: KeybindBuilder,
     pub keybind_editor_mode: keybindings::EditorMode,
@@ -53,6 +54,9 @@ pub struct State {
     pub keybind_editor_input_code_list_state: combo_box::State<KeybindInputCode>,
     pub keybind_editor_source_list_state: combo_box::State<KeybindSource>,
     pub keybind_editor_keycode_list_state: combo_box::State<KeybindKeycode>,
+
+    // Share screen
+    pub import_string: String,
 
 }
 

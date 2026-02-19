@@ -61,6 +61,58 @@ pub fn get_keycode(source: &KeybindSource, keycode_name: &str) -> Option<Keybind
         })
     })
 }
+pub fn from_indices(source_index: usize, keycode_index: usize) -> Option<KeybindKey> {
+    KEYCODES
+    .get(source_index)
+    .and_then(|category| {
+        let source = category.first()?;
+        let keycode = category.iter().nth(keycode_index)?;
+        Some(KeybindKey {
+            source: KeybindSource {
+                index: source_index,
+                name: source.0,
+                pretty_name: source.1,
+                desc: source.2,
+            },
+            keycode: KeybindKeycode {
+                index: keycode_index,
+                name: keycode.0,
+                pretty_name: keycode.1,
+                desc: keycode.2,
+            }
+        })
+    })
+}
+pub fn source_from_index(source_index: usize) -> Option<KeybindSource> {
+    KEYCODES
+    .get(source_index)
+    .and_then(|x| x.first())
+    .and_then(|source|{
+        Some(KeybindSource {
+            index: source_index,
+            name: source.0,
+            pretty_name: source.1,
+            desc: source.2,
+        })
+    })
+}
+pub fn keycode_from_index(source: &KeybindSource, keycode_index: usize) -> Option<KeybindKeycode> {
+    KEYCODES
+    .get(source.index)
+    .and_then(|category|{
+        category
+        .iter()
+        .nth(keycode_index)
+        .and_then(|keycode|{
+            Some(KeybindKeycode {
+                index: keycode_index,
+                name: keycode.0,
+                pretty_name: keycode.1,
+                desc: keycode.2,
+            })
+        })
+    })
+}
 
 pub fn get_all_sources() -> Vec<KeybindSource> {
     KEYCODES
